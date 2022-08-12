@@ -1,7 +1,7 @@
 sudo apt update && sudo apt upgrade -y 
 sudo apt-get install -y  libsndfile1-dev tmux build-essential cmake libsndfile1  espeak python
 
-git clone https://github.com/chocolatedesue/vits.git
+git clone https://github.com/chocolatedesue/vits_web_demo.git
 cd vits
 
 cd monotonic_align
