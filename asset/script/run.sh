@@ -1,0 +1,1 @@
+python3 app.py -m /mydata/model.pth -c /mydata/config.json
