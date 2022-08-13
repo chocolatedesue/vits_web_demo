@@ -6,7 +6,7 @@ COPY . /workspace/
 
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y  libsndfile1-dev cmake libsndfile1  espeak   && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y  libsndfile1-dev cmake libsndfile1  espeak python3-pip  && \
     python3 -m pip install --upgrade pip && \
     pip3 install -r requirements.txt && \
     python3 init_jptalk.py && \

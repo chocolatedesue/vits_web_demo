@@ -99,6 +99,7 @@ if __name__ == '__main__':
                     tts_output1 = gr.Textbox(label="Output Message")
                     tts_output2 = gr.Audio(label="Output Audio")
             with gr.TabItem("Voice Conversion"):
+                gr.Markdown("To enable this, please install ffmpege in the server")
                 with gr.Column():
                     vc_input1 = gr.Dropdown(label="Original Speaker", choices=hps.speakers, type="index",
                                             value=hps.speakers[0])
