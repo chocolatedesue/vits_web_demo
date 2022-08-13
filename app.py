@@ -61,8 +61,8 @@ def vc_fn(original_speaker_id, target_speaker_id, input_audio):
     return "Success", (hps.data.sampling_rate, audio)
 
 def parse_args(parser):
-    parser.add_argument("--config",'-c',default="asset/configs/dalao_config.json")
-    parser.add_argument("--model",'-m',default="asset/model/dalao_model.pth")
+    parser.add_argument("--config",'-c',default="~/.model/model.pth")
+    parser.add_argument("--model",'-m',default="~/.model/config.json")
     return parser
 
 
@@ -93,7 +93,7 @@ if __name__ == '__main__':
         with gr.Tabs():
             with gr.TabItem("TTS"):
                 with gr.Column():
-                    tts_input1 = gr.TextArea(label="Text (150 words limitation)", value="こんにちは。")
+                    tts_input1 = gr.TextArea(label="Text (150 words limitation)", value="こんにちは、あやち寧々です。")
                     tts_input2 = gr.Dropdown(label="Speaker", choices=hps.speakers, type="index", value=hps.speakers[0])
                     tts_submit = gr.Button("Generate", variant="primary")
                     tts_output1 = gr.Textbox(label="Output Message")
@@ -112,4 +112,4 @@ if __name__ == '__main__':
         tts_submit.click(tts_fn, [tts_input1, tts_input2], [tts_output1, tts_output2])
         vc_submit.click(vc_fn, [vc_input1, vc_input2, vc_input3], [vc_output1, vc_output2])
 
-    app.launch()
+    app.launch(server_name='0.0.0.0')
