@@ -17,3 +17,4 @@ vits_demo  /bin/bash /workspace/run.sh
 
 
 #python3 app.py -m /mydata/model.pth -c /mydata/config.json
+#python3 app.py -m ~/.model/model.pth -c ~/.model/config.json

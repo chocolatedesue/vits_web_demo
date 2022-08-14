@@ -1,3 +1,4 @@
 import pyopenjtalk
 
-pyopenjtalk._extract_dic()
+pyopenjtalk. _lazy_init()
+# pyopenjtalk._extract_dic()
