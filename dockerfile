@@ -1,19 +1,19 @@
+FROM mid AS compile-image
+
 FROM ubuntu:20.04
-
 WORKDIR /workspace/
-COPY . /workspace/
 
-# python3-pip
+COPY --from=compile-image /opt/venv /opt/venv 
+COPY --from=compile-image /workspace/ /workspace/
+ENV PATH="/opt/venv/bin:$PATH"
 
+# docker run -itd \
+# --name demo \
+# -p 7860:7860   \
+# -v  ~/.model:/mydata \
+# -e PATH=/root/.local/bin:$PATH \
+# fs  /bin/bash 
 
+# python3 app.py -m /mydata/model.pth -c /mydata/config.json
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y  --no-install-recommends libsndfile1-dev cmake libsndfile1 espeak python3-pip build-essential && \
-    python3 -m pip install --upgrade pip && \
-    pip3 install --user -r requirements.txt && \
-    python3 init_jptalk.py && \
-    cd monotonic_align && \
-    python3 setup.py build_ext --inplace  
-
-
-# CMD ["python3","app.py","-m /mydata/model.pth","-c /mydata/config.json"]
+# python3 /workspace/app.py -m /mydata/model.pth -c /mydata/config.json

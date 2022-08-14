@@ -6,9 +6,10 @@ COPY . /workspace/
 # python3-pip
 
 
+# don't use  --no-install-recommends !!!
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y  --no-install-recommends libsndfile1-dev cmake libsndfile1 espeak python3-pip && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y  libsndfile1-dev cmake libsndfile1 espeak python3-pip && \
     python3 -m pip install --upgrade pip && \
     pip3 install -r requirements.txt && \
     python3 init_jptalk.py && \
