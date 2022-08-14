@@ -6,7 +6,7 @@ Don't used for bussiness***
 
 ## usage 
 ### From docker 
- 1. sudo apt update && sudo apt install docker.io
+ 1. sudo apt update && sudo apt install -y  docker.io
  2. docker pull ccdesue/vits_demo
  3. download the model and config, which should be named as  ~/.model/model.pth, ~/.model/config.json
  4. docker run -it \
@@ -17,7 +17,7 @@ Don't used for bussiness***
 ccdesue/vits_demo   /bin/bash ./run.sh
 
 ### From source
-1. git clone 
+1. git clone https://gitee.com/ccdesue/vits_web_demo.git
 2. cd vits_web_demo && bash asset\script\start_in_server.sh
 3. download model and config 
 4. python3 app.py -m /path/to/model -c /path/to/config
