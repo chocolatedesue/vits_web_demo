@@ -5,7 +5,7 @@ config_path=https://link.jscdn.cn/sharepoint/aHR0cHM6Ly9zdHV4aWRpYW5lZHVjbi1teS5
 sudo mkdir -p ~/.model/
 sudo chmod 777 -R ~/.model/
 
-
+# cjang 大佬的模型
 wget ${model_path} -O ~/.model/model.pth
 wget ${config_path} -O ~/.model/config.json
 

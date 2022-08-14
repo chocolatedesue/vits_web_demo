@@ -33,7 +33,10 @@
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
 				"ms-python.python",
-				"ms-python.vscode-pylance"
+				"ms-python.vscode-pylance",
+				"ms-azuretools.vscode-docker",
+				"donjayamanne.python-extension-pack",
+				"mhutchie.git-graph"
 			]
 		}
 	},
@@ -48,6 +51,6 @@
 	"remoteUser": "vscode",
 	"features": {
 		"git": "os-provided",
-		"docker-in-docker": "latest"
+		"docker-in-docker": "20.10"
 	}
 }

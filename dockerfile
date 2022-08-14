@@ -1,13 +1,21 @@
-FROM continuumio/miniconda3:4.12.0 AS compile-image
+FROM continuumio/miniconda3:4.12.0 
 
 
 WORKDIR /workspace/
+COPY . /workspace/ 
 
-# COPY ./vits /opt/conda/envs/vits
-# COPY ./vits_web_demo/ /workspace/
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && \
+    apt-get install -y cmake build-essential libsndfile1-dev && \
+    conda env create -f conda_env.yml  && \
+    echo "conda activate vits" >> ~/.bashrc && \
+    apt-get remove  -y cmake build-essential && \
+    apt-get clean
 
-# Make RUN commands use the new environment:
-RUN echo "conda activate vits" >> ~/.bashrc
+    
 SHELL ["/bin/bash", "--login", "-c"]
 
+RUN python init_jptalk.py && \
+    cd monotonic_align && \
+    python setup.py build_ext --inplace
 
