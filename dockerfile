@@ -10,12 +10,16 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     conda env create -f conda_env.yml  && \
     echo "conda activate vits" >> ~/.bashrc && \
     apt-get remove  -y cmake build-essential && \
-    apt-get clean
+    apt-get clean && \
+    apt autoremove -y && \
+    conda clean -p   
+
 
     
 SHELL ["/bin/bash", "--login", "-c"]
 
-RUN python init_jptalk.py && \
+RUN pip cache remove purge  && \
+    python init_jptalk.py && \
     cd monotonic_align && \
     python setup.py build_ext --inplace
 

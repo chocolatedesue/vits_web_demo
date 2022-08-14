@@ -2,12 +2,15 @@ model_path=https://link.jscdn.cn/sharepoint/aHR0cHM6Ly9zdHV4aWRpYW5lZHVjbi1teS5z
 
 config_path=https://link.jscdn.cn/sharepoint/aHR0cHM6Ly9zdHV4aWRpYW5lZHVjbi1teS5zaGFyZXBvaW50LmNvbS86dTovZy9wZXJzb25hbC8yMTAwOTIwMDQzMV9zdHVfeGlkaWFuX2VkdV9jbi9FUUNUS0EtVUFSVkx0eUtDa3laYTFUTUJNSGxIeTFPdjNuaFRYNExmbHRQNmNnP2U9bDU3NFVB.jpg 
 
+
 sudo mkdir -p ~/.model/
 sudo chmod 777 -R ~/.model/
-
 # cjang 大佬的模型
 wget ${model_path} -O ~/.model/model.pth
 wget ${config_path} -O ~/.model/config.json
+
+sudo chmod 777 -R ~/.model/
+
 
 docker run -itd \
 --name demo \
