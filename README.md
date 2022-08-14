@@ -9,12 +9,17 @@ Don't used for bussiness***
  1. sudo apt update && sudo apt install -y  docker.io
  2. docker pull ccdesue/vits_demo
  3. download the model and config, which should be named as  ~/.model/model.pth, ~/.model/config.json
- 4. docker run -it \
+ 4. enter the docker
+```docker 
+docker run -itd \
 --name demo \
 -p 7860:7860   \
 -v  ~/.model:/mydata \
 -e PATH=/root/.local/bin:$PATH \
-ccdesue/vits_demo   /bin/bash ./run.sh
+ccdesue/vits_demo   /bin/bash
+```
+5. attach the shell to docker 
+6. python app.py -m /mydata/model.pth -c /mydata/config.json
 
 ### From source
 1. git clone https://gitee.com/ccdesue/vits_web_demo.git
