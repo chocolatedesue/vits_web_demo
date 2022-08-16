@@ -15,7 +15,6 @@ docker run -itd \
 --name demo \
 -p 7860:7860   \
 -v  ~/.model:/mydata \
--e PATH=/root/.local/bin:$PATH \
 ccdesue/vits_demo   /bin/bash
 ```
 5. attach the shell to docker 
