@@ -18,7 +18,7 @@ def get_text(text):
     text_norm = text_to_sequence(text,  hps.data.text_cleaners)
     if hps.data.add_blank:
         text_norm = commons.intersperse(text_norm, 0)
-    text_norm = LongTensor(text_norm)
+    text_norm = LongTensor(text_norm).to(device)
     return text_norm
 
 
@@ -27,9 +27,10 @@ def tts_fn(text, speaker_id):
         return "Error: Text is too long", None
     stn_tst = get_text(text)
     with no_grad():
-        x_tst = stn_tst.unsqueeze(0)
-        x_tst_lengths = LongTensor([stn_tst.size(0)])
-        sid = LongTensor([speaker_id])
+        global device
+        x_tst = stn_tst.to(device).unsqueeze(0)
+        x_tst_lengths = LongTensor([stn_tst.size(0)]).to(device)
+        sid = LongTensor([speaker_id]).to(device)
         audio = model.infer(x_tst, x_tst_lengths, sid=sid, noise_scale=.667, noise_scale_w=0.8, length_scale=1)[0][
             0, 0].data.cpu().float().numpy()
     return "Success", (hps.data.sampling_rate, audio)
@@ -47,14 +48,17 @@ def vc_fn(original_speaker_id, target_speaker_id, input_audio):
         audio = librosa.to_mono(audio.transpose(1, 0))
     if sampling_rate != hps.data.sampling_rate:
         audio = librosa.resample(audio, orig_sr=sampling_rate, target_sr=hps.data.sampling_rate)
-    y = torch.FloatTensor(audio)
+    # 将所有的向量送到cuda中
+    global device
+    y = torch.FloatTensor(audio).to(device)
     y = y.unsqueeze(0)
     spec = spectrogram_torch(y, hps.data.filter_length,
                              hps.data.sampling_rate, hps.data.hop_length, hps.data.win_length,
-                             center=False)
-    spec_lengths = LongTensor([spec.size(-1)])
-    sid_src = LongTensor([original_speaker_id])
-    sid_tgt = LongTensor([target_speaker_id])
+                             center=False).to(device)
+    
+    spec_lengths = LongTensor([spec.size(-1)]).to(device)
+    sid_src = LongTensor([original_speaker_id]).to(device)
+    sid_tgt = LongTensor([target_speaker_id]).to(device)
     with no_grad():
         audio = model.voice_conversion(spec, spec_lengths, sid_src=sid_src, sid_tgt=sid_tgt)[0][
             0, 0].data.cpu().float().numpy()
@@ -75,6 +79,7 @@ if __name__ == '__main__':
 
     config_path = args.config
     model_path = args.model
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     hps = utils.get_hparams_from_file(config_path)
     model = SynthesizerTrn(
@@ -82,7 +87,7 @@ if __name__ == '__main__':
         hps.data.filter_length // 2 + 1,
         hps.train.segment_size // hps.data.hop_length,
         n_speakers=hps.data.n_speakers,
-        **hps.model)
+        **hps.model).to(device)
     utils.load_checkpoint(model_path, model, None)
     model.eval()
 
