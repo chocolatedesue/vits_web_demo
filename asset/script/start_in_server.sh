@@ -8,7 +8,7 @@ sudo  apt update
 
 sudo apt-get install -y  libsndfile1-dev tmux build-essential cmake  espeak python3-pip ffmpeg
 
-pip install -r requirements.txt
+pip install -r requirements_deploy.txt
 
 cd monotonic_align
 python3 setup.py build_ext --inplace
