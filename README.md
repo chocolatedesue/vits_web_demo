@@ -34,7 +34,7 @@ ccdesue/vits_demo   /bin/bash
 
 ## pretrained model and config
 SABBAT OF THE WITCH + DRACU-RIOT!
-1. [model](https://stuxidianeducn-my.sharepoint.com/:u:/g/personal/21009200431_stu_xidian_edu_cn/EX5T4-fzg1FLvI0JYQVXobEBnOgQR55iR9pl3LeySss5nw?e=DLOB1B)
+1. [model](https://stuxidianeducn-my.sharepoint.com/:u:/g/personal/21009200431_stu_xidian_edu_cn/Ee9d3DB9blpJq5mmnHu7C9MBoMWzI94TLvtcgOIDKHcU6g?e=CKsReB)
 2. [config](https://stuxidianeducn-my.sharepoint.com/:u:/g/personal/21009200431_stu_xidian_edu_cn/EXzGh5EAl5tBlYMBh9bZVjUBV6IRY8IJF9hlfUwOXsV0wA?e=Oo1Hh3)
 
 
