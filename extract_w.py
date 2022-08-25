@@ -16,6 +16,6 @@ iteration = checkpoint['iteration']
 torch.save({'model': state_file,
               'iteration': iteration,
               'optimizer': None,
-              'learning_rate': None}, file_path)
+              'learning_rate': None}, out_path)
 
 
