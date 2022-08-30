@@ -8,17 +8,15 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
     apt-get install -y cmake build-essential libsndfile1-dev && \
     conda env create -f conda_env.yml  && \
-    echo "conda activate vits" >> ~/.bashrc && \
-    apt-get remove  -y cmake build-essential && \
-    apt-get clean && \
-    apt autoremove -y && \
-    conda clean -p   
-
-
+    echo "conda activate vits" >> ~/.bashrc 
     
 SHELL ["/bin/bash", "--login", "-c"]
 
 RUN python init_jptalk.py && \
     cd monotonic_align && \
     python setup.py build_ext --inplace && \
-    pip cache remove purge  
+    pip cache remove purge  && \
+    apt-get remove  -y cmake build-essential && \
+    apt-get clean && \
+    apt autoremove -y && \
+    conda clean -a   
