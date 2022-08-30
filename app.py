@@ -14,7 +14,7 @@ from text import text_to_sequence
 from mel_processing import spectrogram_torch
 import argparse
 
-def get_text(text, hps, is_phoneme=False):
+def get_text(text,  is_phoneme=False):
     text_norm = text_to_sequence(text, hps.symbols, [] if is_phoneme else hps.data.text_cleaners)
     if hps.data.add_blank:
         text_norm = commons.intersperse(text_norm, 0)
@@ -22,7 +22,7 @@ def get_text(text, hps, is_phoneme=False):
     return text_norm
 
 
-def tts_fn(text, speaker_id):
+def tts_fn(text ,speaker_id):
     if len(text) > 150:
         return "Error: Text is too long", None
     stn_tst = get_text(text)
