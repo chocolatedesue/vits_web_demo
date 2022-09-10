@@ -1,0 +1,25 @@
+FROM continuumio/miniconda3:4.12.0 
+
+
+WORKDIR /workspace/
+COPY . /workspace/ 
+
+EXPOSE 8088
+
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && \
+    apt-get install cmake build-essential -y && \
+    conda env create -f conda.yml  && \
+    echo "conda activate api" >> ~/.bashrc 
+    
+SHELL ["/bin/bash", "--login", "-c"]
+
+RUN python init_jptalk.py && \
+    cd monotonic_align && \
+    python setup.py build_ext --inplace && \
+    pip cache purge  && \
+    apt-get remove  -y cmake build-essential && \
+    apt-get clean && \
+    conda clean -a -y  
+
+CMD ["uvicorn","app:app"，"--port 8088"] 

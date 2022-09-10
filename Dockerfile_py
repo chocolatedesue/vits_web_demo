@@ -1,0 +1,26 @@
+FROM python:3.9.14-slim
+
+
+WORKDIR /workspace/
+
+EXPOSE 8088
+COPY . /workspace/
+
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && \
+    apt-get install cmake build-essential libsndfile-dev -y && \  
+    python -m pip install --upgrade pip && \
+    pip install torch==1.11.0+cpu  --extra-index-url https://download.pytorch.org/whl/cpu --no-cache-dir && \
+    pip install -r requirements.txt --no-cache-dir  
+
+RUN python init_jptalk.py && \
+    cd monotonic_align && \
+    python setup.py build_ext --inplace && \
+    pip cache purge  && \
+    apt-get remove  -y cmake build-essential && \
+    apt autoremove -y 
+
+
+
+
+CMD python main.py
