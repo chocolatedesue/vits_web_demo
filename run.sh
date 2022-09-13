@@ -1,0 +1,1 @@
+gunicorn --workers 1 --worker-class=uvicorn.workers.UvicornWorker main:app -b 0.0.0.0:8088  --timeout 3600 
