@@ -9,7 +9,7 @@ on:
 
 env:
   # 设置 docker 镜像名
-  IMAGE_NAME: vits_demo
+  IMAGE_NAME: vits_httpapi
 
 jobs:
   # 运行测试，如果需要的话，将注释取消掉并且修改为自己需要的内容
@@ -75,7 +75,7 @@ jobs:
           echo VERSION=$VERSION
           # 设置镜像 id 和版本号
           
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:latest
 
           # 进行 push
-          docker push $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:latest
