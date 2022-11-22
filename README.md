@@ -35,17 +35,12 @@ ccdesue/vits_demo
 ```
 
 
-### From source
-1. sudo apt install  cmake build-essential libsndfile1-dev python3-pip python-is-python3 -y
-2. pip install torch==1.11.0+cpu  --extra-index-url https://download.pytorch.org/whl/cpu
-3. pip install -r requirements.txt
-3. python app.py
-
 > You can alos build your own docker images or server with the repo's code 
 
 ## Helpful info
 1. please read the source code to better understand
 2. refer to the demo config.json to tail to your own model config
+3. refer the dockerfile 
 
 ## pretrained model and config
 yuzusoft*3 + ambitious mission (direct link)
