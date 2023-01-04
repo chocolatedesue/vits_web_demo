@@ -1,7 +1,4 @@
-# import os
-
-# os.system('cd monotonic_align && python setup.py build_ext --inplace && cd ..')
-
+import os
 from typing import Optional
 import librosa
 import pathlib
@@ -31,12 +28,12 @@ def get_text(text):
 
 def tts_fn(text, speaker_id, speed=1.0):
 
-    assert isinstance(text, str), f"text must be str, but got {type(text)}"
-    assert isinstance(
-        speaker_id, int), f"speaker_id must be int, but got {type(speaker_id)}"
-    # assert isinstance(speed, float), f"speed must be float, but got {type(speed)}"
-    if isinstance(speed, str):
-        speed = float(speed)
+    # assert isinstance(text, str), f"text must be str, but got {type(text)}"
+    # assert isinstance(
+    #     speaker_id, int), f"speaker_id must be int, but got {type(speaker_id)}"
+    # # assert isinstance(speed, float), f"speed must be float, but got {type(speed)}"
+    # if isinstance(speed, str):
+    #     speed = float(speed)
     stn_tst = get_text(text)
     with no_grad():
         global device
@@ -118,8 +115,8 @@ def save_model_and_config(model_bytes, config_bytes):
     return str(model_path), str(config_path)
 
 
-if __name__ == '__main__':
-    import os
+def setup_model():
+
     parser = argparse.ArgumentParser(
         description="define the config_path and model_path")
     parser = parse_args(parser)
@@ -138,19 +135,20 @@ if __name__ == '__main__':
             config_url = 'https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhNEJ3enhhUHpqNE5EZWc/root/content'
             import concurrent.futures
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-                model = executor.submit(requests.get, model_url)
-                config = executor.submit(requests.get, config_url)
-                model = model.result().content
-                config = config.result().content
-                model_path, config_path = save_model_and_config(model, config)
+                model_bytes = executor.submit(requests.get, model_url)
+                config_bytes = executor.submit(requests.get, config_url)
+                model_bytes = model_bytes.result().content
+                config_bytes = config_bytes.result().content
+                model_path, config_path = save_model_and_config(model_bytes, config_bytes)
         # else:
     logger.info(f"model_path: {model_path}, config_path: {config_path}")
-
+    global device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
+    global hps  # 读取配置文件
     hps = utils.get_hparams_from_file(config_path)
     global symbols
     symbols = hps.symbols
+    global model  # 读取模型
     model = SynthesizerTrn(
         len(hps.symbols),
         hps.data.filter_length // 2 + 1,
@@ -160,14 +158,12 @@ if __name__ == '__main__':
     utils.load_checkpoint(model_path, model, None)
     model.eval()
 
-    app = gr.Blocks()
-    # mychoice = map(lambda x : +x)
-    speaker_choices = []
-    # for i in range(len(hps.speakers)):
-    #     mychoices.ap
-    # for i, j in enumerate(hps.speakers):
-    #     speaker_choices.append(str(i)+":"+j)
 
+if __name__ == '__main__':
+    setup_model()
+    app = gr.Blocks()
+    speaker_choices = []
+    global hps
     speaker_choices = list(
         map(lambda x: str(x[0])+":"+x[1], enumerate(hps.speakers)))
 
@@ -178,7 +174,7 @@ if __name__ == '__main__':
             with gr.TabItem("TTS"):
                 with gr.Column():
                     tts_input1 = gr.TextArea(
-                        label="Text", value="こんにちは、あやち寧々です。")
+                        label="TTS_text", value="こんにちは、あやち寧々です。")
                     tts_input2 = gr.Dropdown(
                         label="Speaker", choices=speaker_choices, type="index", value=speaker_choices[0])
                     tts_input3 = gr.Slider(
@@ -199,15 +195,14 @@ if __name__ == '__main__':
                     vc_input3 = gr.Audio(label="Input Audio")
                     vc_submit = gr.Button("Convert", variant="primary")
                     vc_output1 = gr.Textbox(label="Output Message")
-                    vc_output2 = gr.Audio(label="Output Audio")
+                    vc_output2 = gr.Audio(label="Output Audio", is_file=False)
 
         tts_submit.click(tts_fn, [tts_input1, tts_input2, tts_input3], [
-                         tts_output1, tts_output2],
-                         api_name="tts"
+                         tts_output1, tts_output2]
 
                          )
         vc_submit.click(vc_fn, [vc_input1, vc_input2, vc_input3], [
-            vc_output1, vc_output2], api_name="vc"
+            vc_output1, vc_output2]
         )
 
     app.queue(concurrency_count=2)
