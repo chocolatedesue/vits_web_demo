@@ -12,7 +12,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
     apt-get install cmake build-essential libsndfile-dev -y --no-install-recommends && \    
     python -m pip install --upgrade pip && \
-    pip install --user -r requirements.txt 
+    pip install --user -r requirements.txt --no-cache-dir 
 
 COPY ./app/ /app
 
