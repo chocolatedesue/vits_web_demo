@@ -19,12 +19,14 @@ ccdesue/vits_demo
 ### From docker 
  1. sudo apt update && sudo apt install -y  docker.io
  2. download the model and config with the postfix .json and .pth
- 3. run the cmd (change -v param to tail to your model and config dir)
+ 3. run the cmd (change -v param to tail to your model and config dir)  
+ 
+Example:
 ```docker 
 docker run -d \
 --name demo \
 -p 7860:7860   \
--v  /mydata:/mydata \
+-v  /mydata:/app/model \
 ccdesue/vits_demo   
 ```
 
