@@ -2,8 +2,12 @@
 
 # os.system('cd monotonic_align && python setup.py build_ext --inplace && cd ..')
 
+from typing import Optional
 import librosa
+import pathlib
+from loguru import logger
 import numpy as np
+import requests
 import torch
 from torch import no_grad, LongTensor
 import commons
@@ -26,8 +30,13 @@ def get_text(text):
 
 
 def tts_fn(text, speaker_id, speed=1.0):
-    # if len(text) > 150:
-    #     return "Error: Text is too long", None
+
+    assert isinstance(text, str), f"text must be str, but got {type(text)}"
+    assert isinstance(
+        speaker_id, int), f"speaker_id must be int, but got {type(speaker_id)}"
+    # assert isinstance(speed, float), f"speed must be float, but got {type(speed)}"
+    if isinstance(speed, str):
+        speed = float(speed)
     stn_tst = get_text(text)
     with no_grad():
         global device
@@ -72,29 +81,71 @@ def vc_fn(original_speaker_id, target_speaker_id, input_audio):
 def parse_args(parser):
     # parser.add_argument("--config",'-c',default="~/.model/model.pth")
     # parser.add_argument("--model",'-m',default="~/.model/config.json")
-    parser.add_argument("--dir", '-d', default="/mydata")
+
+    parser.add_argument("--dir", '-d',  required=False, default=None, type=str)
     return parser
+
+
+def find_by_postfix(dir_path: Optional[str], postfix: Optional[str]):
+    # assert os.path.exists(dir_path), f"{dir_path} not exists"
+    if not dir_path or not postfix:
+        return None
+    if not os.path.exists(dir_path):
+        return None
+    assert isinstance(
+        dir_path, str), f"dir_path must be str, but got {type(dir_path)}"
+    assert isinstance(
+        postfix, str), f"postfix must be str, but got {type(postfix)}"
+    for i in os.listdir(dir_path):
+        res = i.split('.')[-1]
+        if res == postfix:
+            return os.path.join(dir_path, i)
+    # else:
+    return None
+    # raise FileNotFoundError(
+    #     f"Cann't find file endwith {postfix}, please check dir path")
+
+
+def save_model_and_config(model_bytes, config_bytes):
+    model_dir = pathlib.Path.cwd() / ".model"
+    model_dir.mkdir(exist_ok=True)
+    model_path = model_dir / "model.pth"
+    config_path = model_dir / "config.json"
+    with open(model_path, "wb") as f:
+        f.write(model_bytes)
+    with open(config_path, "wb") as f:
+        f.write(config_bytes)
+    return str(model_path), str(config_path)
 
 
 if __name__ == '__main__':
     import os
-
-    def find_by_postfix(dir_path: str, postfix: str):
-        for i in os.listdir(dir_path):
-            res = i.split('.')[-1]
-            if res == postfix:
-                return os.path.join(dir_path, i)
-
-        raise FileNotFoundError(
-            f"Cann't find file endwith {postfix}, please check dir path")
     parser = argparse.ArgumentParser(
         description="define the config_path and model_path")
     parser = parse_args(parser)
     args = parser.parse_args()
-
     dir_path = args.dir
     config_path = find_by_postfix(dir_path, "json")
     model_path = find_by_postfix(dir_path, "pth")
+
+    if not config_path or not model_path:
+        logger.warning("use default config and model")
+        model_dir = pathlib.Path.cwd() / ".model"
+        config_path = find_by_postfix(str(model_dir), "json")
+        model_path = find_by_postfix(str(model_dir), "pth")
+        if not config_path or not model_path:
+            model_url = 'https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJiTzdqanlEQXNyWDV4bDA/root/content'
+            config_url = 'https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhNEJ3enhhUHpqNE5EZWc/root/content'
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                model = executor.submit(requests.get, model_url)
+                config = executor.submit(requests.get, config_url)
+                model = model.result().content
+                config = config.result().content
+                model_path, config_path = save_model_and_config(model, config)
+        # else:
+    logger.info(f"model_path: {model_path}, config_path: {config_path}")
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     hps = utils.get_hparams_from_file(config_path)
@@ -111,11 +162,14 @@ if __name__ == '__main__':
 
     app = gr.Blocks()
     # mychoice = map(lambda x : +x)
-    mychoices = []
+    speaker_choices = []
     # for i in range(len(hps.speakers)):
     #     mychoices.ap
-    for i, j in enumerate(hps.speakers):
-        mychoices.append(str(i)+": "+j)
+    # for i, j in enumerate(hps.speakers):
+    #     speaker_choices.append(str(i)+":"+j)
+
+    speaker_choices = list(
+        map(lambda x: str(x[0])+":"+x[1], enumerate(hps.speakers)))
 
     with app:
         gr.Markdown(
@@ -126,19 +180,9 @@ if __name__ == '__main__':
                     tts_input1 = gr.TextArea(
                         label="Text", value="こんにちは、あやち寧々です。")
                     tts_input2 = gr.Dropdown(
-                        label="Speaker", choices=mychoices, type="index", value=mychoices[0])
+                        label="Speaker", choices=speaker_choices, type="index", value=speaker_choices[0])
                     tts_input3 = gr.Slider(
                         label="Speed", value=1, minimum=0.2, maximum=3, step=0.1)
-                    # with gr.Accordion(label="Advanced Options", open=False):
-                    #     temp_text_var = gr.Variable()
-                    #     symbol_input = gr.Checkbox(
-                    #         value=False, label="Symbol input")
-                    #     symbol_list = gr.Dataset(label="Symbol list", components=[tts_input1],
-                    #                              samples=[[x]
-                    #                                       for x in symbols],
-                    #                              elem_id=f"symbol-list{i}")
-                    #     symbol_list_json = gr.Json(
-                    #         value=symbols, visible=False)
 
                     tts_submit = gr.Button("Generate", variant="primary")
                     tts_output1 = gr.Textbox(label="Output Message")
@@ -158,8 +202,13 @@ if __name__ == '__main__':
                     vc_output2 = gr.Audio(label="Output Audio")
 
         tts_submit.click(tts_fn, [tts_input1, tts_input2, tts_input3], [
-                         tts_output1, tts_output2])
-        vc_submit.click(vc_fn, [vc_input1, vc_input2, vc_input3], [
-                        vc_output1, vc_output2])
+                         tts_output1, tts_output2],
+                         api_name="tts"
 
+                         )
+        vc_submit.click(vc_fn, [vc_input1, vc_input2, vc_input3], [
+            vc_output1, vc_output2], api_name="vc"
+        )
+
+    app.queue(concurrency_count=2)
     app.launch(server_name='0.0.0.0')

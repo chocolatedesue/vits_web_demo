@@ -1,5 +1,5 @@
 FROM python:3.9.14-slim as build 
-ENV POETRY_VERSION=1.2.2
+ENV POETRY_VERSION=1.3.1
 RUN pip install poetry==$POETRY_VERSION
 COPY ./pyproject.toml ./poetry.lock ./
 RUN poetry export -f requirements.txt -o requirements.txt  --without-hashes
@@ -29,7 +29,11 @@ ENV PATH=/root/.local/bin:$PATH
 WORKDIR /app
 RUN python init_jptalk.py  && \
     apt-get update && \
-    apt-get install -y --no-install-recommends libsndfile-dev
+    apt-get install -y --no-install-recommends libsndfile-dev && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /root/.cache/pip && \
+    rm -rf /root/.cache/pypoetry    
+
 
 
 CMD ["python", "app.py"]
