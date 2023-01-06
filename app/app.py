@@ -28,12 +28,8 @@ def get_text(text):
 
 def tts_fn(text, speaker_id, speed=1.0):
 
-    # assert isinstance(text, str), f"text must be str, but got {type(text)}"
-    # assert isinstance(
-    #     speaker_id, int), f"speaker_id must be int, but got {type(speaker_id)}"
-    # # assert isinstance(speed, float), f"speed must be float, but got {type(speed)}"
-    # if isinstance(speed, str):
-    #     speed = float(speed)
+    if len(text) > 200:
+        return "Error: Text is too long, please down it to 200 characters", None
     stn_tst = get_text(text)
     with no_grad():
         global device
@@ -49,9 +45,9 @@ def vc_fn(original_speaker_id, target_speaker_id, input_audio):
     if input_audio is None:
         return "You need to upload an audio", None
     sampling_rate, audio = input_audio
-    # duration = audio.shape[0] / sampling_rate
-    # if duration > 30:
-    #     return "Error: Audio is too long", None
+    duration = audio.shape[0] / sampling_rate
+    if duration > 3600:
+        return "Error: Audio is too long, please down it to 3600s", None
     audio = (audio / np.iinfo(audio.dtype).max).astype(np.float32)
     if len(audio.shape) > 1:
         audio = librosa.to_mono(audio.transpose(1, 0))
@@ -139,7 +135,8 @@ def setup_model():
                 config_bytes = executor.submit(requests.get, config_url)
                 model_bytes = model_bytes.result().content
                 config_bytes = config_bytes.result().content
-                model_path, config_path = save_model_and_config(model_bytes, config_bytes)
+                model_path, config_path = save_model_and_config(
+                    model_bytes, config_bytes)
         # else:
     logger.info(f"model_path: {model_path}, config_path: {config_path}")
     global device
@@ -186,7 +183,7 @@ if __name__ == '__main__':
 
             with gr.TabItem("Voice Conversion"):
                 gr.Markdown(
-                    "To enable this, please install ffmpeg in the server")
+                    "***please upload wav file, other format is not supported now.***")
                 with gr.Column():
                     vc_input1 = gr.Dropdown(label="Original Speaker", choices=hps.speakers, type="index",
                                             value=hps.speakers[0])
