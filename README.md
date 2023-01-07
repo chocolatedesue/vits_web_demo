@@ -26,8 +26,8 @@ Example:
 docker run -d \
 --name demo \
 -p 7860:7860   \
--v  /mydata:/app/model \
-ccdesue/vits_demo   
+-v  /path/to/model_dir:/app/.model \
+ccdesue/vits_demo    
 ```
 
 

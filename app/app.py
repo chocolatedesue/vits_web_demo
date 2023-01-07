@@ -15,6 +15,19 @@ from text import text_to_sequence
 from mel_processing import spectrogram_torch
 import argparse
 
+left = ['（','[','『','「', '【']
+right = ['）',']','』','」','】']
+
+def text_cleanner(text):
+    # return text.replace(" ", "")
+    # sign = ['（','[','『','「', '【', ")","】", "]", "』", "」","）"]
+    global left 
+    global right
+    if text[0] in left:
+        text = text[1:]
+    if text[-1] in right:
+        text = text[:-1]
+    return text.strip()
 
 def get_text(text):
     global symbols
