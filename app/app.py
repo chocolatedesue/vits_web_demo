@@ -14,20 +14,17 @@ from models import SynthesizerTrn
 from text import text_to_sequence
 from mel_processing import spectrogram_torch
 import argparse
+import re
+# left = ['（','[','『','「', '【']
+# right = ['）',']','』','」','】']
+brackets = ['（', '[', '『', '「', '【', ")", "】", "]", "』", "」", "）"]
+pattern = '|'.join(map(re.escape, brackets))
 
-left = ['（','[','『','「', '【']
-right = ['）',']','』','」','】']
 
-def text_cleanner(text):
-    # return text.replace(" ", "")
-    # sign = ['（','[','『','「', '【', ")","】", "]", "』", "」","）"]
-    global left 
-    global right
-    if text[0] in left:
-        text = text[1:]
-    if text[-1] in right:
-        text = text[:-1]
+def text_cleanner(text: str):
+    text = re.sub(pattern, '', text)
     return text.strip()
+
 
 def get_text(text):
     global symbols
@@ -43,6 +40,7 @@ def tts_fn(text, speaker_id, speed=1.0):
 
     if len(text) > 200:
         return "Error: Text is too long, please down it to 200 characters", None
+    text = text_cleanner(text)
     stn_tst = get_text(text)
     with no_grad():
         global device
