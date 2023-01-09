@@ -2,16 +2,27 @@
 
 ### Copy the demo web from [link](https://huggingface.co/spaces/skytnt/moe-japanese-tts/tree/main) 
 > Thanks a lot to [@CjangCjengh](https://github.com/CjangCjengh)
-> only  test  on japanese_cleaners and japanese_cleaners2 in config.json with  [raw vits](https://github.com/jaywalnut310/vits)
+
 
 ***Only used for entertainment.
 Don't used for bussiness***
+
+### quick start 
+```shell
+export name=vits_onnx
+docker stop $name
+docker rm $name
+docker run -d \
+--name $name \
+-p 7860:7860 \
+ccdesue/vits_demo:onnx
+```
 
 
 ### dir structure
 ```
 
-├── app             # ui code 
+├── app             # gradio code 
 ├── build.sh
 ├── Dockerfile      
 ├── export          # some util for export model
@@ -32,6 +43,8 @@ Don't used for bussiness***
 
 ### limitation
 1. unsupported to adjust infer params at running time. It is fixed on model export stage
+2. only  test  on japanese_cleaners and japanese_cleaners2 in config.json with  [raw vits](https://github.com/jaywalnut310/vits)
+
 
 ### Reference
 1. [vits_export_discussion](https://github.com/MasayaKawamura/MB-iSTFT-VITS/issues/8)
