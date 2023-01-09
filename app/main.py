@@ -14,7 +14,7 @@ from app.util import find_path_by_postfix, time_it
 def text_to_seq(text:str):
     text = Config.pattern.sub(' ', text).strip()
     text_norm = text_to_sequence(
-        text, None,  Config.hps.data.text_cleaners)
+        text, Config.hps.symbols ,  Config.hps.data.text_cleaners)
     if Config.hps.data.add_blank:
         text_norm = intersperse(text_norm, 0)
     return text_norm
@@ -24,7 +24,7 @@ def text_to_seq(text:str):
 @time_it
 def tts_fn(text, speaker_id, speed=1.0):
 
-    if len(text) > 200 :
+    if len(text) > 500 :
         return "Error: Text is too long, please down it to 200 characters", None
 
     seq = text_to_seq(text)
@@ -43,19 +43,9 @@ def tts_fn(text, speaker_id, speed=1.0):
     audio *= 32767.0 / max(0.01, np.max(np.abs(audio))) * 0.6
     audio = np.clip(audio, -32767.0, 32767.0)
 
-    return "success", audio.astype(np.int16)
+    return "success", (Config.hps.data.sampling_rate,audio.astype(np.int16))
 
-
-
-
-
-
-def main():
-    dir_path = r"/home/ccds/func/wetts/model"
-    model_path = find_path_by_postfix(dir_path, "onnx")
-    config_path = find_path_by_postfix(dir_path, "json")
-    Config.init(model_path=model_path, cfg_path=config_path)
-
+def set_gradio_view():
     app = gr.Blocks()
 
     with app:
@@ -84,7 +74,39 @@ def main():
 
 
     app.queue(concurrency_count=2)
-    app.launch(server_name='0.0.0.0')
+    app.launch(server_name='0.0.0.0',show_api=True)
+
+
+
+# def set_infer_view():
+#     tts_input1 = gr.TextArea(
+#                         label="TTS_text", value="こんにちは、あやち寧々です。")
+#     tts_input2 = gr.Dropdown(
+#                         label="Speaker", choices=Config.speaker_choices, type="index", value=Config.speaker_choices[0])
+#     tts_input3 = gr.Slider(
+#                         label="Speed", value=1, minimum=0.2, maximum=3, step=0.1)
+#     inputs =  [tts_input1, tts_input2, tts_input3]
+
+#     tts_output1 = gr.Textbox(label="Output Message")
+#     tts_output2 = gr.Audio(label="Output Audio")
+
+#     outputs = [tts_output1, tts_output2]
+#     demo = gr.Interface(fn=tts_fn, inputs=inputs, outputs=outputs,
+        
+#     )
+#     demo.launch(show_api=True)
+
+
+
+
+def main():
+    dir_path = r"/home/ccds/func/wetts/model"
+    model_path = find_path_by_postfix(dir_path, "onnx")
+    config_path = find_path_by_postfix(dir_path, "json")
+    Config.init(model_path=model_path, cfg_path=config_path)
+    set_gradio_view()
+
+ 
 
 
 

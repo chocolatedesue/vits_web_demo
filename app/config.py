@@ -10,17 +10,18 @@ import onnxruntime as ort
 class Config:
     hps:dict = None
     pattern:Pattern = None
-    symbol_to_id:dict = None
+    # symbol_to_id:dict = None
     speaker_choices:list = None 
     ort_sess:ort.InferenceSession = None
     
     @classmethod
     def init(cls,cfg_path:str,model_path:str):
+        logger.add (
+            "vits_infer.log",  rotation="10 MB", encoding="utf-8", enqueue=True, retention="30 days"
+        )
+
         assert os.path.exists(cfg_path), "config file not found"
         cls.hps = get_hparams_from_file(cfg_path)
-        symbols = cls.hps.symbols
-        
-        cls.symbol_to_id = {s: i for i, s in enumerate(symbols)}
 
         brackets = ['（', '[', '『', '「', '【', ")", "】", "]", "』", "」", "）"]
         cls.pattern = re.compile('|'.join(map(re.escape, brackets)))
@@ -31,9 +32,11 @@ class Config:
              f"Config init success, model_path: {model_path}, cfg_path: {cfg_path}, speaker_choices: {cls.speaker_choices}"
         )
         logger.debug(f"Config init success, hps: {cls.hps}")
-        logger.debug(f"Config init success, symbol_to_id: {cls.symbol_to_id}")
+        # logger.debug(f"Config init success, symbol_to_id: {cls.symbol_to_id}")
 
         cls.setup_model(model_path)
+
+
 
 
     @classmethod
