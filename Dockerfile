@@ -28,12 +28,7 @@ ENV TZ=Asia/Shanghai PATH="/opt/venv/bin:$PATH"
 
 
 WORKDIR /app
-RUN python init_jptalk.py  && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends libsndfile-dev && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /root/.cache/pip && \
-    rm -rf /root/.cache/pypoetry    
+RUN python init_jptalk.py  
 
 
 

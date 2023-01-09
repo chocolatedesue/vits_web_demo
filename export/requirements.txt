@@ -12,9 +12,10 @@ sklearn
 WeTextProcessing
 monotonic_align
 matplotlib
-librosa==0.8.0
-scipy==1.5.2
+librosa
+scipy
 transformers
+# Cython
 pyopenjtalk
 unidecode
 # pip3 install torch --extra-index-url https://download.pytorch.org/whl/cpu

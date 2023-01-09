@@ -1,16 +1,16 @@
 import sys
 sys.path.append('..')
 
-
-
-import gradio as gr
-from text import text_to_sequence
-from config import Config
-from app.util import intersperse
-from loguru import logger
-from app.util import find_path_by_suffix, time_it
-import pathlib
 import numpy as np
+from app.util import find_path_by_suffix, time_it
+from loguru import logger
+from app.util import download_defaults, intersperse
+from config import Config
+from text import text_to_sequence
+import gradio as gr
+from multiprocessing import Process
+
+
 
 def text_to_seq(text: str):
     text = Config.pattern.sub(' ', text).strip()
@@ -22,16 +22,20 @@ def text_to_seq(text: str):
 
 
 @time_it
+@logger.catch
 def tts_fn(text, speaker_id, speed=1.0):
 
     if len(text) > 500:
-        return "Error: Text is too long, please down it to 200 characters", None
+        return "Error: Text is too long, please down it to 500 characters", None
+
+    if Config.ort_sess is None:
+        return "Error: model not loaded, please wait for a while or look the log", None
 
     seq = text_to_seq(text)
     x = np.array([seq], dtype=np.int64)
     x_len = np.array([x.shape[1]], dtype=np.int64)
     sid = np.array([speaker_id], dtype=np.int64)
-    speed = 1/speed
+    # speed = 1/speed
     # logger.debug(
     #     f"speed {speed}"
     # )
@@ -79,49 +83,13 @@ def set_gradio_view():
         tts_submit.click(tts_fn, inputs=inputs, outputs=outputs)
 
     app.queue(concurrency_count=2)
-    app.launch(server_name='0.0.0.0', show_api=False)
-
-
-def get_paths() -> tuple[str, str]:
-    dir_path = pathlib.Path(__file__).parent.absolute() / ".model"
-    dir_path.mkdir(
-        parents=True, exist_ok=True
-    )
-
-    model_path = find_path_by_suffix(dir_path, "onnx")
-    config_path = find_path_by_suffix(dir_path, "json")
-    if not model_path or not config_path:
-        model_path = dir_path / "model.onnx"
-        config_path = dir_path / "config.json"
-        logger.warning(
-            "unable to find model or config, try to download default model and config"
-        )
-        import requests
-        import concurrent.futures
-        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            model_url = r"https://ccdesue-my.sharepoint.com/personal/ccds_ccdesue_onmicrosoft_com/_layouts/15/download.aspx?share=ET6NYdpJa7tBsM3vICCcqbsBpnEdRnnTq9m9P26ENutFVA"
-            config_url = r"https://ccdesue-my.sharepoint.com/personal/ccds_ccdesue_onmicrosoft_com/_layouts/15/download.aspx?share=EdsTRVK3l-FJnKNt6fJ15-8BIvq_dsqMIJuAz29oEezqTg"
-            executor.submit(requests.get, model_url, stream=True).add_done_callback(
-                lambda future: open(str(model_path), 'wb').write(future.result().content))
-            executor.submit(requests.get, config_url, stream=True).add_done_callback(
-                lambda future: open(str(config_path), 'wb').write(future.result().content))
-
-            # wait for t1
-            # t1.result()
-            # # wait for t2
-            # t2.result()
-
-    model_path = str(model_path)
-    config_path = str(config_path)
-    logger.info(f"model path: {model_path} config path: {config_path}")
-    return model_path, config_path
+    app.launch(server_name='0.0.0.0', show_api=True, share=False)
 
 
 def main():
-
-    model_path, config_path = get_paths()
-
-    Config.init(model_path=model_path, cfg_path=config_path)
+    # p = Process(target=Config.init)
+    # p.start()
+    Config.init()
     set_gradio_view()
 
 
