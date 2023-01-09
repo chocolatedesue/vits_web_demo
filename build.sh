@@ -1,0 +1,1 @@
+docker build -t ccdesue/vits_demo .
