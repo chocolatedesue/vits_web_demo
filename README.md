@@ -1,12 +1,13 @@
 ## Copy the demo web from [link](https://huggingface.co/spaces/skytnt/moe-japanese-tts/tree/main) 
 > Thanks a lot to [@CjangCjengh](https://github.com/CjangCjengh)
+> only support  japanese_cleaners and japanese_cleaners2 in config.json with raw vits model
 
-***Only used for self-entertainment.
+***Only used for entertainment.
 Don't used for bussiness***
 
 ## usage 
 
-## one-click example
+### one-click example
 ```shell
 # use default model and config
 docker run -d \

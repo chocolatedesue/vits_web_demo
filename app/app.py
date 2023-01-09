@@ -13,7 +13,7 @@ import gradio as gr
 from models import SynthesizerTrn
 from text import text_to_sequence
 from mel_processing import spectrogram_torch
-import argparse
+# import argparse
 import re
 # left = ['（','[','『','「', '【']
 # right = ['）',']','』','」','】']
@@ -22,7 +22,7 @@ pattern = '|'.join(map(re.escape, brackets))
 
 
 def text_cleanner(text: str):
-    text = re.sub(pattern, '', text)
+    text = re.sub(pattern, ' ', text)
     return text.strip()
 
 
@@ -82,74 +82,27 @@ def vc_fn(original_speaker_id, target_speaker_id, input_audio):
     return "Success", (hps.data.sampling_rate, audio)
 
 
-def parse_args(parser):
-    # parser.add_argument("--config",'-c',default="~/.model/model.pth")
-    # parser.add_argument("--model",'-m',default="~/.model/config.json")
-
-    parser.add_argument("--dir", '-d',  required=False, default=None, type=str)
-    return parser
-
-
-def find_by_postfix(dir_path: Optional[str], postfix: Optional[str]):
-    # assert os.path.exists(dir_path), f"{dir_path} not exists"
-    if not dir_path or not postfix:
-        return None
-    if not os.path.exists(dir_path):
-        return None
-    assert isinstance(
-        dir_path, str), f"dir_path must be str, but got {type(dir_path)}"
-    assert isinstance(
-        postfix, str), f"postfix must be str, but got {type(postfix)}"
-    for i in os.listdir(dir_path):
-        res = i.split('.')[-1]
-        if res == postfix:
-            return os.path.join(dir_path, i)
-    # else:
-    return None
-    # raise FileNotFoundError(
-    #     f"Cann't find file endwith {postfix}, please check dir path")
-
-
-def save_model_and_config(model_bytes, config_bytes):
-    model_dir = pathlib.Path.cwd() / ".model"
-    model_dir.mkdir(exist_ok=True)
-    model_path = model_dir / "model.pth"
-    config_path = model_dir / "config.json"
-    with open(model_path, "wb") as f:
-        f.write(model_bytes)
-    with open(config_path, "wb") as f:
-        f.write(config_bytes)
-    return str(model_path), str(config_path)
-
-
 def setup_model():
-
-    parser = argparse.ArgumentParser(
-        description="define the config_path and model_path")
-    parser = parse_args(parser)
-    args = parser.parse_args()
-    dir_path = args.dir
-    config_path = find_by_postfix(dir_path, "json")
-    model_path = find_by_postfix(dir_path, "pth")
-
+    
+    logger.warning("search default config and model")
+    model_dir = pathlib.Path.cwd() / ".model"
+    config_path = utils.find_by_postfix(str(model_dir), "json")
+    model_path = utils.find_by_postfix(str(model_dir), "pth")
     if not config_path or not model_path:
-        logger.warning("use default config and model")
-        model_dir = pathlib.Path.cwd() / ".model"
-        config_path = find_by_postfix(str(model_dir), "json")
-        model_path = find_by_postfix(str(model_dir), "pth")
-        if not config_path or not model_path:
-            model_url = 'https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJiTzdqanlEQXNyWDV4bDA/root/content'
-            config_url = 'https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhNEJ3enhhUHpqNE5EZWc/root/content'
-            import concurrent.futures
-            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-                model_bytes = executor.submit(requests.get, model_url)
-                config_bytes = executor.submit(requests.get, config_url)
-                model_bytes = model_bytes.result().content
-                config_bytes = config_bytes.result().content
-                model_path, config_path = save_model_and_config(
-                    model_bytes, config_bytes)
-        # else:
-    logger.info(f"model_path: {model_path}, config_path: {config_path}")
+        logger.warning("download model and config")
+        model_url = 'https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJiTzdqanlEQXNyWDV4bDA/root/content'
+        config_url = 'https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhNEJ3enhhUHpqNE5EZWc/root/content'
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            model_bytes = executor.submit(requests.get, model_url)
+            config_bytes = executor.submit(requests.get, config_url)
+            model_bytes = model_bytes.result().content
+            config_bytes = config_bytes.result().content
+            model_path, config_path = utils.save_model_and_config(
+                model_bytes, config_bytes)
+    else:
+        logger.warning("use default model and config")
+    logger.debug(f"model_path: {model_path}, config_path: {config_path}")
     global device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     global hps  # 读取配置文件

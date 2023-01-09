@@ -1,11 +1,13 @@
 import io
 import os
 import glob
+import pathlib
 import sys
 import argparse
 import logging
 import json
 import subprocess
+from typing import Optional
 import numpy as np
 from scipy.io.wavfile import read
 import torch
@@ -268,3 +270,38 @@ class HParams():
 
     def __repr__(self):
         return self.__dict__.__repr__()
+
+
+# # customize util
+# def parse_args(parser):
+#     parser.add_argument("--dir", '-d',  required=False, default=None, type=str)
+#     return parser
+
+
+def find_by_postfix(dir_path: Optional[str], postfix: Optional[str]):
+    # assert os.path.exists(dir_path), f"{dir_path} not exists"
+    if not dir_path or not postfix:
+        return None
+    if not os.path.exists(dir_path):
+        return None
+    assert isinstance(
+        dir_path, str), f"dir_path must be str, but got {type(dir_path)}"
+    assert isinstance(
+        postfix, str), f"postfix must be str, but got {type(postfix)}"
+    for i in os.listdir(dir_path):
+        res = i.split('.')[-1]
+        if res == postfix:
+            return os.path.join(dir_path, i)
+    return None
+
+
+def save_model_and_config(model_bytes, config_bytes):
+    model_dir = pathlib.Path.cwd() / ".model"
+    model_dir.mkdir(exist_ok=True)
+    model_path = model_dir / "model.pth"
+    config_path = model_dir / "config.json"
+    with open(model_path, "wb") as f:
+        f.write(model_bytes)
+    with open(config_path, "wb") as f:
+        f.write(config_bytes)
+    return str(model_path), str(config_path)
