@@ -50,8 +50,8 @@ def download_defaults(model_path: pathlib.Path, config_path: pathlib.Path):
     import requests
     from tqdm import tqdm
 
-    model_url = r"https://ccdesue-my.sharepoint.com/personal/ccds_ccdesue_onmicrosoft_com/_layouts/15/download.aspx?share=ET6NYdpJa7tBsM3vICCcqbsBpnEdRnnTq9m9P26ENutFVA"
-    config_url = r"https://ccdesue-my.sharepoint.com/personal/ccds_ccdesue_onmicrosoft_com/_layouts/15/download.aspx?share=EdsTRVK3l-FJnKNt6fJ15-8BIvq_dsqMIJuAz29oEezqTg"
+    model_url = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJlRFc1djM5Q1MzOUhWRGc/root/content"
+    config_url = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhNEJ3enhhUHpqNE5EZWc/root/content"
 
     
     @time_it

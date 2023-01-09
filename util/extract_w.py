@@ -2,8 +2,8 @@
 import torch
 import pathlib
 
-
-model_path = pathlib.Path("G_first.pth")
+path = r"/workspaces/vits_web_demo/export/model/D_second.pth"
+model_path = pathlib.Path(path)
 
 assert model_path.exists(), "model path does not exist"
 

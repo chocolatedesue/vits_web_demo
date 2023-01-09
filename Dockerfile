@@ -12,24 +12,24 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 
 
-COPY ./pyproject.toml ./poetry.lock ./
+COPY ./pyproject.toml ./app/init_jptalk.py ./poetry.lock ./
 RUN poetry export -f requirements.txt -o requirements.txt --without dev --without test  --without-hashes  && \
     python -m venv /opt/venv && \
     /opt/venv/bin/pip install --no-cache-dir -U pip && \
-    /opt/venv/bin/pip install --no-cache-dir -r requirements.txt   
-
+    /opt/venv/bin/pip install --no-cache-dir -r requirements.txt   && \
+    /opt/venv/bin/python3  init_jptalk.py 
 
 # FROM python:3.11.1-slim-bullseye as final
 FROM python:3.9.15-slim-bullseye as final
 EXPOSE 7860
 COPY --from=compile-image /opt/venv /opt/venv
-COPY ./app /app
+# COPY ./app/init_jptalk.py /app/init_jptalk.py
 ENV TZ=Asia/Shanghai PATH="/opt/venv/bin:$PATH"
 
-
 WORKDIR /app
-RUN python init_jptalk.py  
+# RUN python init_jptalk.py  
 
+COPY ./app /app 
 
 
 CMD ["python", "main.py"]
