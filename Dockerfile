@@ -13,8 +13,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 
 COPY ./pyproject.toml ./poetry.lock ./
-RUN pip install poetry==$POETRY_VERSION  && \
-    poetry export -f requirements.txt -o requirements.txt --without dev --without test  --without-hashes  && \
+RUN poetry export -f requirements.txt -o requirements.txt --without dev --without test  --without-hashes  && \
     python -m venv /opt/venv && \
     /opt/venv/bin/pip install --no-cache-dir -U pip && \
     /opt/venv/bin/pip install --no-cache-dir -r requirements.txt   
@@ -38,4 +37,4 @@ RUN python init_jptalk.py  && \
 
 
 
-CMD ["python", "app.py"]
+CMD ["python", "main.py"]

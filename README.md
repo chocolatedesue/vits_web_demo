@@ -30,7 +30,8 @@ Don't used for bussiness***
 2. refer to the demo config.json to tail to your own model config
 3. refer the dockerfile 
 
-
+### limitation
+1. unsupported to adjust infer params at running time. It is fixed on model export stage
 
 ### Reference
 1. [vits_export_discussion](https://github.com/MasayaKawamura/MB-iSTFT-VITS/issues/8)
