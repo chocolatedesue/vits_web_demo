@@ -47,8 +47,7 @@ ccdesue/vits_demo:onnx
 3. refer the dockerfile 
 
 ### limitation
-1. unsupported to adjust infer params at running time. It is fixed on model export stage
-2. only  test  on japanese_cleaners and japanese_cleaners2 in config.json with  [raw vits](https://github.com/jaywalnut310/vits)
+1. only  test  on japanese_cleaners and japanese_cleaners2 in config.json with  [raw vits](https://github.com/jaywalnut310/vits)
 
 
 ### Reference
