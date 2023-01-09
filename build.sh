@@ -1,1 +1,1 @@
-docker build -t ccdesue/vits_demo .
+docker build -t ccdesue/vits_demo:onnx .

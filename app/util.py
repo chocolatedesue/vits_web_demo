@@ -5,20 +5,14 @@ import os
 
 from loguru import logger 
 from app.common import HParams
+from pathlib import Path
 
+def find_path_by_suffix(dir_path: Path, suffix: Path):
+    assert dir_path.is_dir()
 
-def find_path_by_postfix(dir_path: Optional[str], postfix: Optional[str]):
-
-    if not os.path.exists(dir_path):
-        return None
-    assert isinstance(
-        dir_path, str), f"dir_path must be str, but got {type(dir_path)}"
-    assert isinstance(
-        postfix, str), f"postfix must be str, but got {type(postfix)}"
-    for i in os.listdir(dir_path):
-        res = i.split('.')[-1]
-        if res == postfix:
-            return os.path.join(dir_path, i)
+    for path in dir_path.glob(f"*.{suffix}"):
+        return path
+   
     return None
 
 

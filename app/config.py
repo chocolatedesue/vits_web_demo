@@ -20,6 +20,12 @@ class Config:
             "vits_infer.log",  rotation="10 MB", encoding="utf-8", enqueue=True, retention="30 days"
         )
 
+        logger.info(
+            "Config init, model_path: {model_path}, cfg_path: {cfg_path}, speaker_choices: {speaker_choices}"
+        )
+
+     
+
         assert os.path.exists(cfg_path), "config file not found"
         cls.hps = get_hparams_from_file(cfg_path)
 
@@ -28,14 +34,8 @@ class Config:
         cls.speaker_choices = list(
         map(lambda x: str(x[0])+":"+x[1], enumerate(cls.hps.speakers)))
 
-        logger.debug(
-             f"Config init success, model_path: {model_path}, cfg_path: {cfg_path}, speaker_choices: {cls.speaker_choices}"
-        )
-        logger.debug(f"Config init success, hps: {cls.hps}")
-        # logger.debug(f"Config init success, symbol_to_id: {cls.symbol_to_id}")
-
         cls.setup_model(model_path)
-
+        logger.info("Config init done")
 
 
 

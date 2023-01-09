@@ -7,8 +7,8 @@ from text import text_to_sequence
 from config import Config
 from app.util import intersperse
 from loguru import logger
-from app.util import find_path_by_postfix, time_it
-
+from app.util import find_path_by_suffix, time_it
+import pathlib
 
 
 def text_to_seq(text:str):
@@ -74,35 +74,51 @@ def set_gradio_view():
 
 
     app.queue(concurrency_count=2)
-    app.launch(server_name='0.0.0.0',show_api=True)
+    app.launch(server_name='0.0.0.0',show_api=False)
 
 
+def get_paths()->tuple[str,str]:
+    dir_path = pathlib.Path(__file__).parent.absolute() / ".model"
+    dir_path.mkdir(
+        parents=True, exist_ok=True
+    )
 
-# def set_infer_view():
-#     tts_input1 = gr.TextArea(
-#                         label="TTS_text", value="こんにちは、あやち寧々です。")
-#     tts_input2 = gr.Dropdown(
-#                         label="Speaker", choices=Config.speaker_choices, type="index", value=Config.speaker_choices[0])
-#     tts_input3 = gr.Slider(
-#                         label="Speed", value=1, minimum=0.2, maximum=3, step=0.1)
-#     inputs =  [tts_input1, tts_input2, tts_input3]
+    model_path = find_path_by_suffix(dir_path, "onnx")
+    config_path = find_path_by_suffix(dir_path, "json")
+    if not model_path or not config_path:
+        model_path = dir_path / "model.onnx"
+        config_path = dir_path / "config.json"
+        logger.warning(
+            "unable to find model or config, try to download default model and config"
+        )
+        import requests
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            model_url = r"https://ccdesue-my.sharepoint.com/personal/ccds_ccdesue_onmicrosoft_com/_layouts/15/download.aspx?share=ET6NYdpJa7tBsM3vICCcqbsBpnEdRnnTq9m9P26ENutFVA"
+            config_url = r"https://ccdesue-my.sharepoint.com/personal/ccds_ccdesue_onmicrosoft_com/_layouts/15/download.aspx?share=EdsTRVK3l-FJnKNt6fJ15-8BIvq_dsqMIJuAz29oEezqTg"
+            executor.submit(requests.get, model_url, stream=True).add_done_callback(
+                lambda future: open(str(model_path) , 'wb').write(future.result().content))
+            executor.submit(requests.get, config_url, stream=True).add_done_callback(
+                lambda future: open(str(config_path), 'wb').write(future.result().content))
+            
+            # wait for t1
+            # t1.result()
+            # # wait for t2
+            # t2.result()
 
-#     tts_output1 = gr.Textbox(label="Output Message")
-#     tts_output2 = gr.Audio(label="Output Audio")
-
-#     outputs = [tts_output1, tts_output2]
-#     demo = gr.Interface(fn=tts_fn, inputs=inputs, outputs=outputs,
-        
-#     )
-#     demo.launch(show_api=True)
-
+    model_path = str(model_path)
+    config_path = str(config_path)
+    logger.info(f"model path: {model_path} config path: {config_path}" )
+    return   model_path, config_path
 
 
 
 def main():
-    dir_path = r"/home/ccds/func/wetts/model"
-    model_path = find_path_by_postfix(dir_path, "onnx")
-    config_path = find_path_by_postfix(dir_path, "json")
+   
+
+
+    model_path, config_path = get_paths()
+
     Config.init(model_path=model_path, cfg_path=config_path)
     set_gradio_view()
 
