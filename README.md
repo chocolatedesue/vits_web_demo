@@ -35,7 +35,8 @@ Don't used for bussiness***
 
 ### Reference
 1. [vits_export_discussion](https://github.com/MasayaKawamura/MB-iSTFT-VITS/issues/8)
-2. [vits_onnx](https://github.com/NaruseMioShirakana/VitsOnnx)
+2. [other_vits_onnx](https://github.com/NaruseMioShirakana/VitsOnnx)
+3. [wetts](https://github.com/wenet-e2e/wetts)
 
 
 ### license 

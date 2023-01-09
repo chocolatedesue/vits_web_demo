@@ -87,7 +87,7 @@ def main():
     seq = torch.randint(low=0, high=phone_num, size=(1, 10), dtype=torch.long)
     seq_len = torch.IntTensor([seq.size(1)]).long()
 
-    # 对应原本infer的三个输入
+    # 对应原本infer的三个输入 只能在导出时候指定 运行时无法改变
     scales = torch.FloatTensor([0.667, 1.0, 0.8])
     # make triton dynamic shape happy
     scales = scales.unsqueeze(0)
