@@ -1,11 +1,11 @@
-from multiprocessing import Process
-import gradio as gr
-from text import text_to_sequence
-from config import Config
-from app.util import download_defaults, intersperse
-from loguru import logger
-from app.util import find_path_by_suffix, time_it
+# from multiprocessing import Process
 import numpy as np
+from app.util import find_path_by_suffix, time_it
+from loguru import logger
+from app.util import download_defaults, intersperse
+from config import Config
+from text import text_to_sequence
+import gradio as gr
 import sys
 sys.path.append('..')
 
@@ -78,7 +78,8 @@ def set_gradio_view():
         tts_submit.click(tts_fn, inputs=inputs, outputs=outputs)
 
     app.queue(concurrency_count=2)
-    app.launch(server_name='0.0.0.0', show_api=True, share=False)
+    app.launch(server_name='0.0.0.0', show_api=False,
+               share=False, server_port=7860)
 
 
 def main():

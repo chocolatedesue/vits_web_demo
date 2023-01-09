@@ -1,3 +1,4 @@
+docker image rm ccdesue/vits_demo:onnx -f --no-prune
 docker build -t ccdesue/vits_demo:onnx .
 
 function run()
@@ -14,5 +15,6 @@ ccdesue/vits_demo:onnx
 # docker run --rm -it -p 7860:7860/tcp ccdesue/vits_demo:onnx  bash
 
 function push(){
+    
     docker push ccdesue/vits_demo:onnx
 }
