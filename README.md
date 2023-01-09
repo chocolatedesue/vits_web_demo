@@ -31,5 +31,11 @@ Don't used for bussiness***
 3. refer the dockerfile 
 
 
+
+### Reference
+1. [vits_export_discussion](https://github.com/MasayaKawamura/MB-iSTFT-VITS/issues/8)
+2. [vits_onnx](https://github.com/NaruseMioShirakana/VitsOnnx)
+
+
 ### license 
 GPLv2
