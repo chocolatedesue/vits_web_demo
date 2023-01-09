@@ -136,7 +136,7 @@ def main():
                 audio = np.clip(audio, -32767.0, 32767.0)
 
                 end_time = time.time()
-                print("time cost: ", end_time - start_time)
+                print("infer time cost: ", end_time - start_time)
 
                 wavfile.write(args.outdir + "/" + audio_path.split("/")[-1],
                               hps.data.sampling_rate, audio.astype(np.int16))
