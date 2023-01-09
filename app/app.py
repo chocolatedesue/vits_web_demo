@@ -83,7 +83,7 @@ def vc_fn(original_speaker_id, target_speaker_id, input_audio):
 
 
 def setup_model():
-    
+
     logger.warning("search default config and model")
     model_dir = pathlib.Path.cwd() / ".model"
     config_path = utils.find_by_postfix(str(model_dir), "json")
@@ -121,6 +121,7 @@ def setup_model():
 
 
 if __name__ == '__main__':
+    # if not os.getenv("INIT"):
     setup_model()
     app = gr.Blocks()
     speaker_choices = []
