@@ -1,4 +1,12 @@
 # update pip 
+
+function setup_py{
+    conda create -n dl python=3.9 -y
+    conda init bash
+    bash
+}
+
+conda activate dl
 export DEBIAN_FRONTEND=noninteractive && \
     sudo apt-get update && \
     sudo apt-get install cmake build-essential  -y --no-install-recommends
