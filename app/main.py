@@ -1,15 +1,13 @@
+from multiprocessing import Process
+import gradio as gr
+from text import text_to_sequence
+from config import Config
+from app.util import download_defaults, intersperse
+from loguru import logger
+from app.util import find_path_by_suffix, time_it
+import numpy as np
 import sys
 sys.path.append('..')
-
-import numpy as np
-from app.util import find_path_by_suffix, time_it
-from loguru import logger
-from app.util import download_defaults, intersperse
-from config import Config
-from text import text_to_sequence
-import gradio as gr
-from multiprocessing import Process
-
 
 
 def text_to_seq(text: str):
@@ -35,11 +33,8 @@ def tts_fn(text, speaker_id, speed=1.0):
     x = np.array([seq], dtype=np.int64)
     x_len = np.array([x.shape[1]], dtype=np.int64)
     sid = np.array([speaker_id], dtype=np.int64)
-    # speed = 1/speed
-    # logger.debug(
-    #     f"speed {speed}"
-    # )
-    scales = np.array([0.667, 1.0, speed], dtype=np.float32)
+    speed = 1/speed
+    scales = np.array([0.667, speed, 0.8], dtype=np.float32)
     scales.resize(1, 3)
     ort_inputs = {
         'input': x,
@@ -67,15 +62,15 @@ def set_gradio_view():
                         label="TTS_text", value="こんにちは、あやち寧々です。")
                     tts_input2 = gr.Dropdown(
                         label="Speaker", choices=Config.speaker_choices, type="index", value=Config.speaker_choices[0])
-                    # tts_input3 = gr.Slider(
-                    #     label="Speed", value=1, minimum=0.2, maximum=3, step=0.1)
+                    tts_input3 = gr.Slider(
+                        label="Speed", value=1, minimum=0.2, maximum=3, step=0.1)
 
                     tts_submit = gr.Button("Generate", variant="primary")
                     tts_output1 = gr.Textbox(label="Output Message")
                     tts_output2 = gr.Audio(label="Output Audio")
 
                     inputs = [
-                        tts_input1, tts_input2
+                        tts_input1, tts_input2, tts_input3
                     ]
                     outputs = [
                         tts_output1, tts_output2]

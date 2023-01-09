@@ -86,7 +86,7 @@ def main():
             audio_path = arr[0]
         
             # TODO: 控制说话人编号
-            sid = 0
+            sid = 8
             text = arr[1]
             # else:
             #     sid = speaker_dict[arr[1]]
@@ -110,7 +110,9 @@ def main():
                 x = np.array([seq], dtype=np.int64)
                 x_len = np.array([x.shape[1]], dtype=np.int64)
                 sid = np.array([sid], dtype=np.int64)
-                scales = np.array([0.667, 1.0, 1], dtype=np.float32)
+                # noise(可用于控制感情等变化程度) lenth(可用于控制整体语速) noisew(控制音素发音长度变化程度)
+                # 参考 https://github.com/gbxh/genshinTTS
+                scales = np.array([0.667, 0.8, 1], dtype=np.float32)
                 # scales = scales[np.newaxis, :]
                 # scales.reshape(1, -1)
                 scales.resize(1, 3)
@@ -129,14 +131,14 @@ def main():
                 #     'sid': to_numpy(sid)
                 # }
                 import time
-                start_time = time.time()
-
+                # start_time = time.time()
+                start_time = time.perf_counter()
                 audio = np.squeeze(ort_sess.run(None, ort_inputs))
                 audio *= 32767.0 / max(0.01, np.max(np.abs(audio))) * 0.6
                 audio = np.clip(audio, -32767.0, 32767.0)
-
-                end_time = time.time()
-                print("infer time cost: ", end_time - start_time)
+                end_time = time.perf_counter()
+                # end_time = time.time()
+                print("infer time cost: ", end_time - start_time, "s")
 
                 wavfile.write(args.outdir + "/" + audio_path.split("/")[-1],
                               hps.data.sampling_rate, audio.astype(np.int16))
