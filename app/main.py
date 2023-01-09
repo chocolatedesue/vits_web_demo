@@ -19,6 +19,17 @@ brackets = ['（', '[', '『', '「', '【', ")", "】", "]", "』", "」", "）
 pattern = re.compile('|'.join(map(re.escape, brackets)))
 
 
+def time_it(func: callable):
+    def wrapper(*args, **kwargs):
+        import time
+        start = time.time()
+        res = func(*args, **kwargs)
+        end = time.time()
+        logger.debug(f"Time cost: {end-start}")
+        return res
+    return wrapper
+
+
 def text_cleanner(text: str):
     # text = re.sub(pattern, ' ', text)
     text = pattern.sub(' ', text)
@@ -35,10 +46,9 @@ def get_text(text):
     return text_norm
 
 
-@logger.catch
-@utils.time_it
+@time_it
 def tts_fn(text, speaker_id, speed=1.0):
-
+    logger.debug(f"Text: {text}, Speaker ID: {speaker_id}, Speed: {speed}")
     if len(text) > 200:
         return "Error: Text is too long, please down it to 200 characters", None
     text = text_cleanner(text)
@@ -56,6 +66,8 @@ def tts_fn(text, speaker_id, speed=1.0):
 @logger.catch
 @utils.time_it
 def vc_fn(original_speaker_id, target_speaker_id, input_audio):
+    logger.debug(
+        f"Original Speaker ID: {original_speaker_id}, Target Speaker ID: {target_speaker_id}")
     if input_audio is None:
         return "You need to upload an audio", None
     sampling_rate, audio = input_audio
