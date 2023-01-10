@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from loguru import logger
-from app import CONFIG_URL, MODEL_URL
+# from app import CONFIG_URL, MODEL_URL
 from app.util import get_hparams_from_file, get_paths, time_it
 import requests
 from tqdm.auto import tqdm
@@ -12,12 +12,18 @@ import onnxruntime as ort
 import threading
 
 
+MODEL_URL = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJmckZWcGdCR0xxLWJmU28/root/content"
+CONFIG_URL = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhNEJ3enhhUHpqNE5EZWc/root/content"
+
+
+
 class Config:
     hps: dict = None
     pattern: Pattern = None
     # symbol_to_id:dict = None
     speaker_choices: list = None
     ort_sess: ort.InferenceSession = None
+    model_is_ok: bool = False
 
     @classmethod
     def init(cls):
@@ -25,6 +31,10 @@ class Config:
         # logger.add(
         #     "vits_infer.log",  rotation="10 MB", encoding="utf-8", enqueue=True, retention="30 days"
         # )
+
+        brackets = ['（', '[', '『', '「', '【', ")", "】", "]", "』", "」", "）"]
+        cls.pattern = re.compile('|'.join(map(re.escape, brackets)))
+
         dir_path = Path(__file__).parent.absolute() / ".model"
         dir_path.mkdir(
             parents=True, exist_ok=True
@@ -50,10 +60,9 @@ class Config:
             cls.setup_config(str(config_path))
             cls.setup_model(str(model_path))
 
-        brackets = ['（', '[', '『', '「', '【', ")", "】", "]", "』", "」", "）"]
-        cls.pattern = re.compile('|'.join(map(re.escape, brackets)))
-
     @classmethod
+    @logger.catch
+    @time_it
     def setup_model(cls, model_path: str):
         import numpy as np
         cls.ort_sess = ort.InferenceSession(model_path)
@@ -82,6 +91,8 @@ class Config:
         }
         cls.ort_sess.run(None, ort_inputs)
 
+        cls.model_is_ok = True
+
         logger.info(
             f"model init done with model path {model_path}"
         )
@@ -97,8 +108,6 @@ class Config:
         )
 
     @classmethod
-    @time_it
-    @logger.catch
     def pdownload(cls, url: str, save_path: str, chunk_size: int = 8192):
         # copy from https://github.com/tqdm/tqdm/blob/master/examples/tqdm_requests.py
         file_size = int(requests.head(url).headers["Content-Length"])

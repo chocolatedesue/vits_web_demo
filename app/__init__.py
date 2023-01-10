@@ -1,3 +1,4 @@
+
 class HParams():
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
@@ -28,7 +29,3 @@ class HParams():
 
     def __repr__(self):
         return self.__dict__.__repr__()
-
-
-MODEL_URL = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJlRFc1djM5Q1MzOUhWRGc/root/content"
-CONFIG_URL = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhNEJ3enhhUHpqNE5EZWc/root/content"

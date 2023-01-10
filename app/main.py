@@ -26,7 +26,7 @@ def tts_fn(text, speaker_id, speed=1.0):
     if len(text) > 300:
         return "Error: Text is too long, please down it to 300 characters", None
 
-    if Config.ort_sess is None:
+    if not Config.model_is_ok:
         return "Error: model not loaded, please wait for a while or look the log", None
 
     seq = text_to_seq(text)
@@ -78,6 +78,7 @@ def set_gradio_view():
         tts_submit.click(tts_fn, inputs=inputs, outputs=outputs)
 
     app.queue(concurrency_count=3)
+    gr.close_all()
     app.launch(server_name='0.0.0.0', show_api=False,
                share=False, server_port=7860)
 
