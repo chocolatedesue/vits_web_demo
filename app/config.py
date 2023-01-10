@@ -35,7 +35,7 @@ class Config:
         model_path, config_path = get_paths(dir_path)
 
         if not model_path or not config_path:
-            model_path = dir_path / "model.onnx"
+            model_path = dir_path / "model.pth"
             config_path = dir_path / "config.json"
             logger.warning(
                 "unable to find model or config, try to download default model and config"

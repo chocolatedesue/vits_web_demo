@@ -328,7 +328,7 @@ def download_defaults(model_path: pathlib.Path, config_path: pathlib.Path):
 
 def get_paths(dir_path: pathlib.Path):
 
-    model_path: pathlib.Path = find_path_by_suffix(dir_path, "onnx")
+    model_path: pathlib.Path = find_path_by_suffix(dir_path, "pth")
     config_path: pathlib.Path = find_path_by_suffix(dir_path, "json")
     # if not model_path or not config_path:
     #     model_path = dir_path / "model.onnx"
