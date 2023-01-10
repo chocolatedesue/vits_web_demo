@@ -43,4 +43,4 @@ RUN python init_jptalk.py  && \
 
 
 
-CMD ["python", "app.py"]
+CMD ["python", "main.py"]

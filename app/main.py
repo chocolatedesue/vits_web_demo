@@ -1,10 +1,9 @@
-import os
-from typing import Optional
+# import os
+# from typing import Optional
 import librosa
 import pathlib
 from loguru import logger
 import numpy as np
-import requests
 import torch
 from torch import no_grad, LongTensor
 import commons
@@ -15,14 +14,14 @@ from text import text_to_sequence
 from mel_processing import spectrogram_torch
 # import argparse
 import re
-# left = ['（','[','『','「', '【']
-# right = ['）',']','』','」','】']
+
 brackets = ['（', '[', '『', '「', '【', ")", "】", "]", "』", "」", "）"]
-pattern = '|'.join(map(re.escape, brackets))
+pattern = re.compile('|'.join(map(re.escape, brackets)))
 
 
 def text_cleanner(text: str):
-    text = re.sub(pattern, ' ', text)
+    # text = re.sub(pattern, ' ', text)
+    text = pattern.sub(' ', text)
     return text.strip()
 
 
@@ -36,6 +35,8 @@ def get_text(text):
     return text_norm
 
 
+@logger.catch
+@utils.time_it
 def tts_fn(text, speaker_id, speed=1.0):
 
     if len(text) > 200:
@@ -52,6 +53,8 @@ def tts_fn(text, speaker_id, speed=1.0):
     return "Success", (hps.data.sampling_rate, audio)
 
 
+@logger.catch
+@utils.time_it
 def vc_fn(original_speaker_id, target_speaker_id, input_audio):
     if input_audio is None:
         return "You need to upload an audio", None
@@ -85,29 +88,26 @@ def vc_fn(original_speaker_id, target_speaker_id, input_audio):
 def setup_model():
 
     logger.warning("search default config and model")
-    model_dir = pathlib.Path.cwd() / ".model"
-    config_path = utils.find_by_postfix(str(model_dir), "json")
-    model_path = utils.find_by_postfix(str(model_dir), "pth")
+    dir_path = pathlib.Path(__file__).parent.absolute() / ".model"
+    dir_path.mkdir(
+        parents=True, exist_ok=True
+    )
+    model_path = utils.find_path_by_suffix(dir_path, "pth")
+    config_path = utils.find_path_by_suffix(dir_path, "json")
     if not config_path or not model_path:
-        logger.warning("download model and config")
-        model_url = 'https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJiTzdqanlEQXNyWDV4bDA/root/content'
-        config_url = 'https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhNEJ3enhhUHpqNE5EZWc/root/content'
-        import concurrent.futures
-        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            model_bytes = executor.submit(requests.get, model_url)
-            config_bytes = executor.submit(requests.get, config_url)
-            model_bytes = model_bytes.result().content
-            config_bytes = config_bytes.result().content
-            model_path, config_path = utils.save_model_and_config(
-                model_bytes, config_bytes)
-    else:
-        logger.warning("use default model and config")
+        logger.warning(
+            "unable to find model or config, try to download default model and config"
+        )
+        model_path = dir_path / "model.pth"
+        config_path = dir_path / "config.json"
+        utils.download_defaults(model_path=model_path, config_path=config_path)
+
     logger.debug(f"model_path: {model_path}, config_path: {config_path}")
     global device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     global hps  # 读取配置文件
-    hps = utils.get_hparams_from_file(config_path)
-    global symbols
+    hps = utils.get_hparams_from_file(str(config_path))
+    # global symbols
     symbols = hps.symbols
     global model  # 读取模型
     model = SynthesizerTrn(
@@ -122,12 +122,10 @@ def setup_model():
 
 if __name__ == '__main__':
     # if not os.getenv("INIT"):
-    setup_model()
+    # setup_model()
+    Config.init()
     app = gr.Blocks()
-    speaker_choices = []
-    global hps
-    speaker_choices = list(
-        map(lambda x: str(x[0])+":"+x[1], enumerate(hps.speakers)))
+
 
     with app:
         gr.Markdown(
@@ -136,7 +134,7 @@ if __name__ == '__main__':
             with gr.TabItem("TTS"):
                 with gr.Column():
                     tts_input1 = gr.TextArea(
-                        label="TTS_text", value="こんにちは、あやち寧々です。")
+                        label="TTS_text", value="わたしの趣味はたくさんあります。でも、一番好きな事は写真をとることです。")
                     tts_input2 = gr.Dropdown(
                         label="Speaker", choices=speaker_choices, type="index", value=speaker_choices[0])
                     tts_input3 = gr.Slider(
@@ -157,7 +155,7 @@ if __name__ == '__main__':
                     vc_input3 = gr.Audio(label="Input Audio")
                     vc_submit = gr.Button("Convert", variant="primary")
                     vc_output1 = gr.Textbox(label="Output Message")
-                    vc_output2 = gr.Audio(label="Output Audio", is_file=False)
+                    vc_output2 = gr.Audio(label="Output Audio")
 
         tts_submit.click(tts_fn, [tts_input1, tts_input2, tts_input3], [
                          tts_output1, tts_output2]
@@ -168,4 +166,5 @@ if __name__ == '__main__':
         )
 
     app.queue(concurrency_count=2)
-    app.launch(server_name='0.0.0.0')
+    gr.close_all()
+    app.launch(server_name='0.0.0.0', server_port=7860, show_api=False)

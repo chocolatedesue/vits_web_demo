@@ -4,7 +4,15 @@ DUMMY3
 logs
 __pycache__
 .ipynb_checkpoints
+# Customize 
+*.wav
+model/
+*.onnx 
+*.pth
+
+
 .*.swp
+
 *.so
 *.c
 *.pyc
