@@ -11,6 +11,7 @@ import utils
 import gradio as gr
 from models import SynthesizerTrn
 from text import text_to_sequence
+from utils import time_it
 from mel_processing import spectrogram_torch
 # import argparse
 import re
@@ -20,117 +21,10 @@ brackets = ['（', '[', '『', '「', '【', ")", "】", "]", "』", "」", "）
 pattern = re.compile('|'.join(map(re.escape, brackets)))
 
 
-def time_it(func: callable):
-    def wrapper(*args, **kwargs):
-        import time
-        start = time.time()
-        res = func(*args, **kwargs)
-        end = time.time()
-        logger.debug(f"Time cost: {end-start}")
-        return res
-    return wrapper
-
-
-def text_cleanner(text: str):
-    # text = re.sub(pattern, ' ', text)
-    text = pattern.sub(' ', text)
-    return text.strip()
-
-
-def get_text(text):
-    global symbols
-    text_norm = text_to_sequence(
-        text, symbols,  Config.hps.data.text_cleaners)
-    if Config.hps.data.add_blank:
-        text_norm = commons.intersperse(text_norm, 0)
-    text_norm = LongTensor(text_norm)
-    return text_norm
-
-
-@time_it
-def tts_fn(text, speaker_id, speed=1.0):
-    logger.debug(f"Text: {text}, Speaker ID: {speaker_id}, Speed: {speed}")
-    if len(text) > 200:
-        return "Error: Text is too long, please down it to 200 characters", None
-    text = text_cleanner(text)
-    stn_tst = get_text(text)
-    with no_grad():
-        global device
-        x_tst = stn_tst.to(device).unsqueeze(0)
-        x_tst_lengths = LongTensor([stn_tst.size(0)]).to(device)
-        sid = LongTensor([speaker_id]).to(device)
-        audio = Config.model.infer(x_tst, x_tst_lengths, sid=sid, noise_scale=.667, noise_scale_w=0.8, length_scale=1.0/speed)[0][
-            0, 0].data.cpu().float().numpy()
-    return "Success", (Config.hps.data.sampling_rate, audio)
-
-
-@logger.catch
-@utils.time_it
-def vc_fn(original_speaker_id, target_speaker_id, input_audio):
-    logger.debug(
-        f"Original Speaker ID: {original_speaker_id}, Target Speaker ID: {target_speaker_id}")
-    if input_audio is None:
-        return "You need to upload an audio", None
-    sampling_rate, audio = input_audio
-    duration = audio.shape[0] / sampling_rate
-    if duration > 3600:
-        return "Error: Audio is too long, please down it to 3600s", None
-    audio = (audio / np.iinfo(audio.dtype).max).astype(np.float32)
-    if len(audio.shape) > 1:
-        audio = librosa.to_mono(audio.transpose(1, 0))
-    if sampling_rate != Config.hps.data.sampling_rate:
-        audio = librosa.resample(
-            audio, orig_sr=sampling_rate, target_sr=Config.hps.data.sampling_rate)
-    # 将所有的向量送到cuda中
-    global device
-    y = torch.FloatTensor(audio).to(device)
-    y = y.unsqueeze(0)
-    spec = spectrogram_torch(y, Config.hps.data.filter_length,
-                             Config.hps.data.sampling_rate, Config.hps.data.hop_length, Config.hps.data.win_length,
-                             center=False).to(device)
-
-    spec_lengths = LongTensor([spec.size(-1)]).to(device)
-    sid_src = LongTensor([original_speaker_id]).to(device)
-    sid_tgt = LongTensor([target_speaker_id]).to(device)
-    with no_grad():
-        audio = Config.model.voice_conversion(spec, spec_lengths, sid_src=sid_src, sid_tgt=sid_tgt)[0][
-            0, 0].data.cpu().float().numpy()
-    return "Success", (Config.hps.data.sampling_rate, audio)
-
-
-# def setup_model():
-
-#     logger.warning("search default config and model")
-#     dir_path = pathlib.Path(__file__).parent.absolute() / ".model"
-#     dir_path.mkdir(
-#         parents=True, exist_ok=True
-#     )
-#     model_path = utils.find_path_by_suffix(dir_path, "pth")
-#     config_path = utils.find_path_by_suffix(dir_path, "json")
-#     if not config_path or not model_path:
-#         logger.warning(
-#             "unable to find model or config, try to download default model and config"
-#         )
-#         model_path = dir_path / "model.pth"
-#         config_path = dir_path / "config.json"
-#         utils.download_defaults(model_path=model_path, config_path=config_path)
-
-#     logger.debug(f"model_path: {model_path}, config_path: {config_path}")
-#     global device
-#     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-#     global Config.hps  # 读取配置文件
-#     Config.hps = utils.get_hparams_from_file(str(config_path))
-#     # global symbols
-#     symbols = Config.hps.symbols
-#     global model  # 读取模型
-#     model = SynthesizerTrn(
-#         len(Config.hps.symbols),
-#         Config.hps.data.filter_length // 2 + 1,
-#         Config.hps.train.segment_size // Config.hps.data.hop_length,
-#         n_speakers=Config.hps.data.n_speakers,
-#         **Config.hps.model).to(device)
-#     utils.load_checkpoint(model_path, model, None)
-#     model.eval()
+# def text_cleanner(text: str):
+#     # text = re.sub(pattern, ' ', text)
+#     text = pattern.sub(' ', text)
+#     return text.strip()
 
 
 if __name__ == '__main__':
@@ -169,14 +63,14 @@ if __name__ == '__main__':
                     vc_output1 = gr.Textbox(label="Output Message")
                     vc_output2 = gr.Audio(label="Output Audio")
 
-        tts_submit.click(tts_fn, [tts_input1, tts_input2, tts_input3], [
+        tts_submit.click(Config.tts_fn, [tts_input1, tts_input2, tts_input3], [
                          tts_output1, tts_output2]
 
                          )
-        vc_submit.click(vc_fn, [vc_input1, vc_input2, vc_input3], [
+        vc_submit.click(Config.vc_fn, [vc_input1, vc_input2, vc_input3], [
             vc_output1, vc_output2]
         )
 
     app.queue(concurrency_count=2)
     gr.close_all()
-    app.launch(server_name='0.0.0.0', server_port=7860, show_api=False)
+    app.launch(server_name='0.0.0.0',  show_api=False)
