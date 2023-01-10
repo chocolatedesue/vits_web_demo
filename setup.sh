@@ -17,3 +17,6 @@ pip install -r requirements.txt
 
 
 
+function run{
+    python -m app.main
+}

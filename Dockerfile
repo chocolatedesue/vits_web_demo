@@ -26,10 +26,6 @@ COPY --from=compile-image /opt/venv /opt/venv
 # COPY ./app/init_jptalk.py /app/init_jptalk.py
 ENV TZ=Asia/Shanghai PATH="/opt/venv/bin:$PATH"
 
-WORKDIR /app
-# RUN python init_jptalk.py  
-
 COPY ./app /app 
-
-
-CMD ["python", "main.py"]
+WORKDIR /
+CMD ["python", "-m","app.main"]

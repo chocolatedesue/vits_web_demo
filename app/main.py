@@ -1,13 +1,13 @@
 # from multiprocessing import Process
 import numpy as np
-from app.util import find_path_by_suffix, time_it
+from .util import find_path_by_suffix, time_it
 from loguru import logger
-from app.util import download_defaults, intersperse
-from config import Config
-from text import text_to_sequence
+from .util import download_defaults, intersperse
+from .config import Config
+from .text import text_to_sequence
 import gradio as gr
-import sys
-sys.path.append('..')
+# import sys
+# sys.path.append('..')
 
 
 def text_to_seq(text: str):
@@ -23,8 +23,8 @@ def text_to_seq(text: str):
 @logger.catch
 def tts_fn(text, speaker_id, speed=1.0):
 
-    if len(text) > 500:
-        return "Error: Text is too long, please down it to 500 characters", None
+    if len(text) > 300:
+        return "Error: Text is too long, please down it to 300 characters", None
 
     if Config.ort_sess is None:
         return "Error: model not loaded, please wait for a while or look the log", None
@@ -59,7 +59,7 @@ def set_gradio_view():
             with gr.TabItem("TTS"):
                 with gr.Column():
                     tts_input1 = gr.TextArea(
-                        label="TTS_text", value="こんにちは、あやち寧々です。")
+                        label="TTS_text", value="わたしの趣味はたくさんあります。でも、一番好きな事は写真をとることです。")
                     tts_input2 = gr.Dropdown(
                         label="Speaker", choices=Config.speaker_choices, type="index", value=Config.speaker_choices[0])
                     tts_input3 = gr.Slider(
@@ -77,7 +77,7 @@ def set_gradio_view():
 
         tts_submit.click(tts_fn, inputs=inputs, outputs=outputs)
 
-    app.queue(concurrency_count=2)
+    app.queue(concurrency_count=3)
     app.launch(server_name='0.0.0.0', show_api=False,
                share=False, server_port=7860)
 

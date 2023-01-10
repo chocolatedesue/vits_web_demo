@@ -1,7 +1,7 @@
 """ from https://github.com/keithito/tacotron """
 from loguru import logger
 # from app.config import Config
-from text import cleaners
+from . import cleaners
 
 _symbol_to_id = None
 

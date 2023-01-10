@@ -37,9 +37,11 @@ def time_it(func: callable):
     import time
 
     def wrapper(*args, **kwargs):
-        start = time.time()
+        # start = time.time()
+        start = time.perf_counter()
         res = func(*args, **kwargs)
-        end = time.time()
+        # end = time.time()
+        end = time.perf_counter()
         # print(f"func {func.__name__} cost {end-start} seconds")
         logger.info(f"func {func.__name__} cost {end-start} seconds")
         return res
@@ -53,15 +55,14 @@ def download_defaults(model_path: pathlib.Path, config_path: pathlib.Path):
     model_url = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJlRFc1djM5Q1MzOUhWRGc/root/content"
     config_url = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhNEJ3enhhUHpqNE5EZWc/root/content"
 
-    
     @time_it
     def pdownload(url: str, save_path: str):
-  
+
         file_size = int(requests.head(url).headers["Content-Length"])
         CHUNK_SIZE = 8192
         response = requests.get(url, stream=True)
         with tqdm(total=file_size, unit="B",
-                  unit_scale=True, desc="progress") as pbar:
+                  unit_scale=True, desc="progress",  colour="green") as pbar:
 
             with open(save_path, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
