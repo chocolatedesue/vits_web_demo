@@ -39,11 +39,6 @@ ccdesue/vits_demo
 2. refer to the demo config.json to tail to your own model config
 3. refer the dockerfile 
 
-## pretrained model and config
-yuzusoft*3 + ambitious mission (direct link)
-1. [model](https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJiTzdqanlEQXNyWDV4bDA/root/content)
-2. [config](https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhNEJ3enhhUHpqNE5EZWc/root/content)  
-
 
 
 
