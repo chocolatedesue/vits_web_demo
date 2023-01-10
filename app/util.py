@@ -1,12 +1,19 @@
 
 import json
 import pathlib
+# import tqdm
+
 from typing import Optional
 import os
+import threading
 
 from loguru import logger
-from app.common import HParams
+# from app.common import HParams
+# from __ini import HParams
 from pathlib import Path
+import requests
+
+from app import HParams
 
 
 def find_path_by_suffix(dir_path: Path, suffix: Path):
@@ -48,52 +55,32 @@ def time_it(func: callable):
     return wrapper
 
 
-def download_defaults(model_path: pathlib.Path, config_path: pathlib.Path):
-    import requests
-    from tqdm import tqdm
-
-    model_url = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJlRFc1djM5Q1MzOUhWRGc/root/content"
-    config_url = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhNEJ3enhhUHpqNE5EZWc/root/content"
-
-    @time_it
-    def pdownload(url: str, save_path: str):
-
-        file_size = int(requests.head(url).headers["Content-Length"])
-        CHUNK_SIZE = 8192
-        response = requests.get(url, stream=True)
-        with tqdm(total=file_size, unit="B",
-                  unit_scale=True, desc="progress",  colour="green") as pbar:
-
-            with open(save_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
-                    if chunk:
-                        f.write(chunk)
-                        pbar.update(CHUNK_SIZE)
-
-    pdownload(model_url, str(model_path))
-
-    config = requests.get(config_url).content
-    with open(str(config_path), 'wb') as f:
-        f.write(config)
 
 
-def get_paths() -> tuple[str, str]:
-    dir_path = pathlib.Path(__file__).parent.absolute() / ".model"
-    dir_path.mkdir(
-        parents=True, exist_ok=True
-    )
 
-    model_path = find_path_by_suffix(dir_path, "onnx")
-    config_path = find_path_by_suffix(dir_path, "json")
-    if not model_path or not config_path:
-        model_path = dir_path / "model.onnx"
-        config_path = dir_path / "config.json"
-        logger.warning(
-            "unable to find model or config, try to download default model and config"
-        )
-        download_defaults(model_path, config_path)
+# def download_defaults(model_path: pathlib.Path, config_path: pathlib.Path):
 
-    model_path = str(model_path)
-    config_path = str(config_path)
-    logger.info(f"model path: {model_path} config path: {config_path}")
+#     config = requests.get(config_url,  timeout=10).content
+#     with open(str(config_path), 'wb') as f:
+#         f.write(config)
+
+#     t = threading.Thread(target=pdownload, args=(model_url, str(model_path)))
+#     t.start()
+
+
+def get_paths(dir_path: Path):
+
+    model_path: Path = find_path_by_suffix(dir_path, "onnx")
+    config_path: Path = find_path_by_suffix(dir_path, "json")
+    # if not model_path or not config_path:
+    #     model_path = dir_path / "model.onnx"
+    #     config_path = dir_path / "config.json"
+    #     logger.warning(
+    #         "unable to find model or config, try to download default model and config"
+    #     )
+    #     download_defaults(model_path, config_path)
+
+    # model_path = str(model_path)
+    # config_path = str(config_path)
+    # logger.info(f"model path: {model_path} config path: {config_path}")
     return model_path, config_path

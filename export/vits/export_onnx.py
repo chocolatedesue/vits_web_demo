@@ -92,7 +92,7 @@ def main():
     scales = torch.FloatTensor([0.667, 1.0, 0.8])
     # make triton dynamic shape happy
     scales = scales.unsqueeze(0)
-    sid = torch.IntTensor([1]).long()
+    sid = torch.IntTensor([0]).long()
 
     dummy_input = (seq, seq_len, scales, sid)
     torch.onnx.export(model=net_g,

@@ -2,7 +2,7 @@
 import numpy as np
 from .util import find_path_by_suffix, time_it
 from loguru import logger
-from .util import download_defaults, intersperse
+from .util import  intersperse
 from .config import Config
 from .text import text_to_sequence
 import gradio as gr
