@@ -2,7 +2,7 @@
 import numpy as np
 from .util import find_path_by_suffix, time_it
 from loguru import logger
-from .util import  intersperse
+from .util import intersperse
 from .config import Config
 from .text import text_to_sequence
 import gradio as gr
@@ -49,6 +49,25 @@ def tts_fn(text, speaker_id, speed=1.0):
     return "success", (Config.hps.data.sampling_rate, audio.astype(np.int16))
 
 
+def setup_elements():
+    tts_input1 = gr.TextArea(
+        label="TTS_text", value="わたしの趣味はたくさんあります。でも、一番好きな事は写真をとることです。")
+    tts_input2 = gr.Dropdown(
+        label="Speaker", choices=Config.speaker_choices, type="index", value=Config.speaker_choices[0])
+    tts_input3 = gr.Slider(
+        label="Speed", value=1, minimum=0.2, maximum=3, step=0.1)
+
+    tts_output1 = gr.Textbox(label="Output Message")
+    tts_output2 = gr.Audio(label="Output Audio")
+    return [tts_input1, tts_input2, tts_input3], [tts_output1, tts_output2]
+
+
+def set_infer_view():
+    inputs, outputs = setup_elements()
+    demo = gr.Interface(tts_fn, inputs, outputs)
+    demo.launch()
+
+
 def set_gradio_view():
     app = gr.Blocks()
 
@@ -58,22 +77,9 @@ def set_gradio_view():
         with gr.Tabs():
             with gr.TabItem("TTS"):
                 with gr.Column():
-                    tts_input1 = gr.TextArea(
-                        label="TTS_text", value="わたしの趣味はたくさんあります。でも、一番好きな事は写真をとることです。")
-                    tts_input2 = gr.Dropdown(
-                        label="Speaker", choices=Config.speaker_choices, type="index", value=Config.speaker_choices[0])
-                    tts_input3 = gr.Slider(
-                        label="Speed", value=1, minimum=0.2, maximum=3, step=0.1)
 
+                    inputs, outputs = setup_elements()
                     tts_submit = gr.Button("Generate", variant="primary")
-                    tts_output1 = gr.Textbox(label="Output Message")
-                    tts_output2 = gr.Audio(label="Output Audio")
-
-                    inputs = [
-                        tts_input1, tts_input2, tts_input3
-                    ]
-                    outputs = [
-                        tts_output1, tts_output2]
 
         tts_submit.click(tts_fn, inputs=inputs, outputs=outputs)
 
@@ -88,6 +94,7 @@ def main():
     # p.start()
     Config.init()
     set_gradio_view()
+    # set_infer_view()
 
 
 if __name__ == '__main__':

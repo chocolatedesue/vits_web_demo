@@ -25,7 +25,9 @@ EXPOSE 7860
 COPY --from=compile-image /opt/venv /opt/venv
 # COPY ./app/init_jptalk.py /app/init_jptalk.py
 ENV TZ=Asia/Shanghai PATH="/opt/venv/bin:$PATH"
-
 COPY ./app /app 
 WORKDIR /
+# use for huggingface
+RUN mkdir -p /app/.model && \
+    chmod -R  777  /app 
 CMD ["python", "-m","app.main"]

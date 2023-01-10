@@ -7,9 +7,8 @@ RUN if [ -f "/tmp/conda-tmp/environment.yml" ]; then umask 0002 && /opt/conda/bi
     && rm -rf /tmp/conda-tmp
 
 # [Optional] Uncomment to install a different version of Python than the default
-# RUN conda install -y python=3.6 \
-#     && pip install --no-cache-dir pipx \
-#     && pipx reinstall-all
+RUN conda create -n dl python=3.9 -y && \
+    conda activate dl
 
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
