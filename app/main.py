@@ -64,8 +64,22 @@ def setup_elements():
 
 def set_infer_view():
     inputs, outputs = setup_elements()
-    demo = gr.Interface(tts_fn, inputs, outputs)
-    demo.launch()
+    demo = gr.Interface(tts_fn, inputs, outputs,
+                        # examples=[
+                        #    [ "わたしの趣味はたくさんあります。でも、一番好きな事は写真をとることです。", 0, 1.0]
+                        # ],
+                        )
+    # gr.Examples(
+    #     examples=[
+    #         ["わたしの趣味はたくさんあります。でも、一番好きな事は写真をとることです。", 0, 1.0]
+    #     ],
+    #     fn=tts_fn,
+    #     inputs=inputs, outputs=outputs,
+    #     cache_examples=True
+    # )
+    demo.launch(
+        show_api=True
+    )
 
 
 def set_gradio_view():
@@ -82,11 +96,20 @@ def set_gradio_view():
                     tts_submit = gr.Button("Generate", variant="primary")
 
         tts_submit.click(tts_fn, inputs=inputs, outputs=outputs)
+    #     gr.Examples(
+    #     examples=[
+    #         ["わたしの趣味はたくさんあります。でも、一番好きな事は写真をとることです。", 0, 1.0]
+    #     ],
+    #     fn=tts_fn,
+    #     inputs=inputs, outputs=outputs,
+    #     cache_examples=True
+    # )
 
     app.queue(concurrency_count=3)
-    gr.close_all()
-    app.launch(server_name='0.0.0.0', show_api=False,
-               share=False, server_port=7860)
+ 
+    # gr.close_all()
+    app.launch(server_name='0.0.0.0', show_api=False, 
+               share=False)
 
 
 def main():

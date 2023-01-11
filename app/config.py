@@ -9,12 +9,11 @@ from tqdm.auto import tqdm
 import re
 from re import Pattern
 import onnxruntime as ort
-import threading
+# import threading
 
 
 MODEL_URL = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJmckZWcGdCR0xxLWJmU28/root/content"
 CONFIG_URL = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhNEJ3enhhUHpqNE5EZWc/root/content"
-
 
 
 class Config:
@@ -26,6 +25,8 @@ class Config:
     model_is_ok: bool = False
 
     @classmethod
+    @logger.catch
+    @time_it
     def init(cls):
 
         # logger.add(
@@ -51,9 +52,15 @@ class Config:
             with open(str(config_path), 'wb') as f:
                 f.write(cfg)
             cls.setup_config(str(config_path))
-            t = threading.Thread(target=cls.pdownload,
-                                 args=(MODEL_URL, str(model_path)))
-            t.start()
+            # import threading
+            # t = threading.Thread(target=cls.pdownload,
+            #                      args=(MODEL_URL, str(model_path)))
+            # t.start()
+            import multiprocessing
+
+            p = multiprocessing.Process(target=cls.pdownload,
+                                        args=(MODEL_URL, str(model_path)))
+            p.start()
             # cls.pdownload(MODEL_URL, str(model_path))
 
         else:
@@ -61,7 +68,6 @@ class Config:
             cls.setup_model(str(model_path))
 
     @classmethod
-    @logger.catch
     @time_it
     def setup_model(cls, model_path: str):
         import numpy as np
@@ -108,6 +114,7 @@ class Config:
         )
 
     @classmethod
+    @time_it
     def pdownload(cls, url: str, save_path: str, chunk_size: int = 8192):
         # copy from https://github.com/tqdm/tqdm/blob/master/examples/tqdm_requests.py
         file_size = int(requests.head(url).headers["Content-Length"])
