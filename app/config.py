@@ -1,7 +1,4 @@
-import os
-import re
 from pathlib import Path
-from re import Pattern
 
 import onnxruntime as ort
 import requests

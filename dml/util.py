@@ -5,6 +5,7 @@ import onnxruntime as ort
 from loguru import logger
 import numpy as np
 
+
 def time_it(func: callable):
     import time
 
@@ -15,10 +16,12 @@ def time_it(func: callable):
         # end = time.time()
         end = time.perf_counter()
         # print(f"func {func.__name__} cost {end-start} seconds")
-        logger.info(f"func {func.__name__} cost {end-start} seconds")
+        logger.info(f"func {func.__name__} cost {end - start} seconds")
         return res
+
     return wrapper
-    
+
+
 @time_it
 def ort_infer(ort_sess: ort.InferenceSession, ort_inputs: dict):
     audio = np.squeeze(ort_sess.run(None, ort_inputs))
@@ -60,7 +63,7 @@ class HParams():
 
 
 def get_hparams_from_file(config_path):
-    with open(config_path, "r") as f:
+    with open(config_path, "r", encoding="utf-8") as f:
         data = f.read()
     config = json.loads(data)
 
@@ -78,7 +81,7 @@ def find_path_by_suffix(dir_path: Path, suffix: Path):
 
 
 def get_hparams_from_file(config_path):
-    with open(config_path, "r") as f:
+    with open(config_path, "r", encoding="utf-8") as f:
         data = f.read()
     config = json.loads(data)
 
@@ -92,11 +95,7 @@ def intersperse(lst, item):
     return result
 
 
-
-
-
 def get_paths(dir_path: Path):
-
     model_path: Path = find_path_by_suffix(dir_path, "onnx")
     config_path: Path = find_path_by_suffix(dir_path, "json")
     return model_path, config_path

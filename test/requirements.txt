@@ -1,0 +1,6 @@
+# python == 3.7
+onnxruntime-directml
+pydub 
+pyopenjtalk
+loguru
+unidecode

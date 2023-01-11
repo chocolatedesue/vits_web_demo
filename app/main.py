@@ -1,16 +1,16 @@
 # from multiprocessing import Process
-import numpy as np
-from .util import time_it
-from loguru import logger
-from .config import Config
 import gradio as gr
+import numpy as np
+from loguru import logger
+
+from .config import Config
 from .text import text_to_seq
+from .util import time_it
 
 
 @time_it
 @logger.catch
 def tts_fn(text, speaker_id, speed=1.0):
-
     # if len(text) > 300:
     #     return "Error: Text is too long, please down it to 300 characters", None
 
@@ -24,7 +24,7 @@ def tts_fn(text, speaker_id, speed=1.0):
     x = np.array([seq], dtype=np.int64)
     x_len = np.array([x.shape[1]], dtype=np.int64)
     sid = np.array([speaker_id], dtype=np.int64)
-    speed = 1/speed
+    speed = 1 / speed
     scales = np.array([0.667, speed, 0.8], dtype=np.float32)
     scales.resize(1, 3)
     ort_inputs = {
@@ -83,7 +83,6 @@ def set_gradio_view():
         with gr.Tabs():
             with gr.TabItem("TTS"):
                 with gr.Column():
-
                     inputs, outputs = setup_elements()
                     tts_submit = gr.Button("Generate", variant="primary")
 
@@ -105,7 +104,6 @@ def set_gradio_view():
 
 
 def main():
-
     Config.init()
     set_gradio_view()
     # set_infer_view()
@@ -113,6 +111,7 @@ def main():
 
 if __name__ == '__main__':
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--share', '-s', type=bool, default=False)
     args = parser.parse_args()
