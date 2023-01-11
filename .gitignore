@@ -9,8 +9,9 @@ __pycache__
 model/
 *.onnx 
 *.pth
-
-
+/bin
+*.secret
+*.env
 .*.swp
 
 *.so

@@ -83,6 +83,7 @@ class Config:
             'CPUExecutionProvider',
         ]
 
+
         cls.ort_sess = ort.InferenceSession(model_path, providers=providers)
         # init the model
         seq = np.random.randint(low=0, high=len(
