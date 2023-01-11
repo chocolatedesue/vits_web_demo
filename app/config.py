@@ -1,14 +1,16 @@
 import os
+import re
 from pathlib import Path
+from re import Pattern
 
+import onnxruntime as ort
+import requests
 from loguru import logger
+from tqdm.auto import tqdm
+
 # from app import CONFIG_URL, MODEL_URL
 from app.util import get_hparams_from_file, get_paths, time_it
-import requests
-from tqdm.auto import tqdm
-import re
-from re import Pattern
-import onnxruntime as ort
+
 # import threading
 
 
@@ -102,7 +104,9 @@ class Config:
     def model_warm_up(ort_sess, hps):
         # init the model
         import numpy as np
+
         from .text import text_to_seq
+
         # seq = np.random.randint(low=0, high=len(
         #     hps.symbols), size=(1, 10), dtype=np.int64)
 

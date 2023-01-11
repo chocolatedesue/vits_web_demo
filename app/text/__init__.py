@@ -1,12 +1,8 @@
 """ from https://github.com/keithito/tacotron """
+import json
 import re
-from loguru import logger
 
-from app.config import Config
-from app.util import intersperse
-# from app.config import Config
 from . import cleaners
-
 
 _symbol_to_id = None
 pattern = None

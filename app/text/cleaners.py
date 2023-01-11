@@ -1,6 +1,7 @@
 import re
-from unidecode import unidecode
+
 import pyopenjtalk
+from unidecode import unidecode
 
 pyopenjtalk._lazy_init()
 

@@ -5,7 +5,6 @@ import onnxruntime as ort
 from loguru import logger
 import numpy as np
 
-
 def time_it(func: callable):
     import time
 
@@ -19,10 +18,7 @@ def time_it(func: callable):
         logger.info(f"func {func.__name__} cost {end-start} seconds")
         return res
     return wrapper
-
-# def construct_ort_input( ):
-
-
+    
 @time_it
 def ort_infer(ort_sess: ort.InferenceSession, ort_inputs: dict):
     audio = np.squeeze(ort_sess.run(None, ort_inputs))
@@ -94,6 +90,9 @@ def intersperse(lst, item):
     result = [item] * (len(lst) * 2 + 1)
     result[1::2] = lst
     return result
+
+
+
 
 
 def get_paths(dir_path: Path):

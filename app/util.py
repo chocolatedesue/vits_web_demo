@@ -4,16 +4,53 @@ import pathlib
 # import tqdm
 
 from typing import Optional
-import os
-import threading
+
 
 from loguru import logger
 # from app.common import HParams
 # from __ini import HParams
 from pathlib import Path
-import requests
 
-from app import HParams
+
+class HParams():
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            if type(v) == dict:
+                v = HParams(**v)
+            self[k] = v
+
+    def keys(self):
+        return self.__dict__.keys()
+
+    def items(self):
+        return self.__dict__.items()
+
+    def values(self):
+        return self.__dict__.values()
+
+    def __len__(self):
+        return len(self.__dict__)
+
+    def __getitem__(self, key):
+        return getattr(self, key)
+
+    def __setitem__(self, key, value):
+        return setattr(self, key, value)
+
+    def __contains__(self, key):
+        return key in self.__dict__
+
+    def __repr__(self):
+        return self.__dict__.__repr__()
+
+
+def get_hparams_from_file(config_path):
+    with open(config_path, "r") as f:
+        data = f.read()
+    config = json.loads(data)
+
+    hparams = HParams(**config)
+    return hparams
 
 
 def find_path_by_suffix(dir_path: Path, suffix: Path):
@@ -54,33 +91,10 @@ def time_it(func: callable):
         return res
     return wrapper
 
-
-
-
-
-# def download_defaults(model_path: pathlib.Path, config_path: pathlib.Path):
-
-#     config = requests.get(config_url,  timeout=10).content
-#     with open(str(config_path), 'wb') as f:
-#         f.write(config)
-
-#     t = threading.Thread(target=pdownload, args=(model_url, str(model_path)))
-#     t.start()
-
+ 
 
 def get_paths(dir_path: Path):
 
     model_path: Path = find_path_by_suffix(dir_path, "onnx")
     config_path: Path = find_path_by_suffix(dir_path, "json")
-    # if not model_path or not config_path:
-    #     model_path = dir_path / "model.onnx"
-    #     config_path = dir_path / "config.json"
-    #     logger.warning(
-    #         "unable to find model or config, try to download default model and config"
-    #     )
-    #     download_defaults(model_path, config_path)
-
-    # model_path = str(model_path)
-    # config_path = str(config_path)
-    # logger.info(f"model path: {model_path} config path: {config_path}")
     return model_path, config_path
