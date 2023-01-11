@@ -1,9 +1,34 @@
 """ from https://github.com/keithito/tacotron """
+import re
 from loguru import logger
+
+from app.config import Config
+from app.util import intersperse
 # from app.config import Config
 from . import cleaners
 
+
 _symbol_to_id = None
+pattern = None
+
+
+def build_pattern():
+    brackets = ['（', '[', '『', '「', '【', ")", "】", "]", "』", "」", "）"]
+    pattern = re.compile('|'.join(map(re.escape, brackets)))
+    return pattern
+
+
+def text_to_seq(text: str, hps):
+    global pattern
+    if not pattern:
+        pattern = build_pattern()
+    text = pattern.sub(' ', text).strip()
+    text_norm = text_to_sequence(
+        text, hps.symbols, hps.data.text_cleaners)
+    if hps.data.add_blank:
+        text_norm = intersperse(text_norm, 0)
+    return text_norm
+
 
 def text_to_sequence(text, symbols, cleaner_names):
     '''Converts a string of text to a sequence of IDs corresponding to the symbols in the text.
@@ -20,11 +45,8 @@ def text_to_sequence(text, symbols, cleaner_names):
 
     global _symbol_to_id
 
-
     if not _symbol_to_id:
         _symbol_to_id = {s: i for i, s in enumerate(symbols)}
-
- 
 
     clean_text = _clean_text(text, cleaner_names)
 

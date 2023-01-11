@@ -1,35 +1,26 @@
 # from multiprocessing import Process
 import numpy as np
-from .util import find_path_by_suffix, time_it
+from .util import time_it
 from loguru import logger
-from .util import intersperse
 from .config import Config
-from .text import text_to_sequence
 import gradio as gr
-# import sys
-# sys.path.append('..')
-
-
-def text_to_seq(text: str):
-    text = Config.pattern.sub(' ', text).strip()
-    text_norm = text_to_sequence(
-        text, Config.hps.symbols,  Config.hps.data.text_cleaners)
-    if Config.hps.data.add_blank:
-        text_norm = intersperse(text_norm, 0)
-    return text_norm
+from .text import text_to_seq
 
 
 @time_it
 @logger.catch
 def tts_fn(text, speaker_id, speed=1.0):
 
-    if len(text) > 300:
-        return "Error: Text is too long, please down it to 300 characters", None
+    # if len(text) > 300:
+    #     return "Error: Text is too long, please down it to 300 characters", None
 
     if not Config.model_is_ok:
         return "Error: model not loaded, please wait for a while or look the log", None
 
-    seq = text_to_seq(text)
+    seq = text_to_seq(text, Config.hps)
+    # logger.warning(
+    #     seq
+    # )
     x = np.array([seq], dtype=np.int64)
     x_len = np.array([x.shape[1]], dtype=np.int64)
     sid = np.array([speaker_id], dtype=np.int64)
@@ -79,7 +70,7 @@ def set_infer_view():
     # )
     global args
     demo.launch(
-        show_api=True,share=args.share
+        show_api=True, share=args.share
     )
 
 

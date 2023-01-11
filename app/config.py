@@ -18,7 +18,7 @@ CONFIG_URL = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3Uvcy
 
 class Config:
     hps: dict = None
-    pattern: Pattern = None
+    # pattern: Pattern = None
     # symbol_to_id:dict = None
     speaker_choices: list = None
     ort_sess: ort.InferenceSession = None
@@ -32,9 +32,6 @@ class Config:
         # logger.add(
         #     "vits_infer.log",  rotation="10 MB", encoding="utf-8", enqueue=True, retention="30 days"
         # )
-
-        brackets = ['（', '[', '『', '「', '【', ")", "】", "]", "』", "」", "）"]
-        cls.pattern = re.compile('|'.join(map(re.escape, brackets)))
 
         dir_path = Path(__file__).parent.absolute() / ".model"
         dir_path.mkdir(
@@ -70,7 +67,6 @@ class Config:
     @classmethod
     @time_it
     def setup_model(cls, model_path: str):
-        import numpy as np
 
         providers = [
             ('CUDAExecutionProvider', {
@@ -85,10 +81,33 @@ class Config:
 
 
         cls.ort_sess = ort.InferenceSession(model_path, providers=providers)
-        # init the model
-        seq = np.random.randint(low=0, high=len(
-            cls.hps.symbols), size=(1, 10), dtype=np.int64)
+        cls.model_warm_up(cls.ort_sess, cls.hps)
+        cls.model_is_ok = True
 
+        logger.info(
+            f"model init done with model path {model_path}"
+        )
+
+    @classmethod
+    def setup_config(cls, config_path: str):
+        cls.hps = get_hparams_from_file(config_path)
+        cls.speaker_choices = list(
+            map(lambda x: str(x[0])+":"+x[1], enumerate(cls.hps.speakers)))
+
+        logger.info(
+            f"config init done with config path {config_path}"
+        )
+
+    @staticmethod
+    def model_warm_up(ort_sess, hps):
+        # init the model
+        import numpy as np
+        from .text import text_to_seq
+        # seq = np.random.randint(low=0, high=len(
+        #     hps.symbols), size=(1, 10), dtype=np.int64)
+
+        seq = np.array(
+            [text_to_seq("こにちわ、あやせです", hps=Config.hps)], dtype=np.int64)
         # seq_len = torch.IntTensor([seq.size(1)]).long()
         seq_len = np.array([seq.shape[1]], dtype=np.int64)
 
@@ -108,23 +127,7 @@ class Config:
             'scales': scales,
             'sid': sid
         }
-        cls.ort_sess.run(None, ort_inputs)
-
-        cls.model_is_ok = True
-
-        logger.info(
-            f"model init done with model path {model_path}"
-        )
-
-    @classmethod
-    def setup_config(cls, config_path: str):
-        cls.hps = get_hparams_from_file(config_path)
-        cls.speaker_choices = list(
-            map(lambda x: str(x[0])+":"+x[1], enumerate(cls.hps.speakers)))
-
-        logger.info(
-            f"config init done with config path {config_path}"
-        )
+        ort_sess.run(None, ort_inputs)
 
     @classmethod
     @time_it
