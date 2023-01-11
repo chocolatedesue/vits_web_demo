@@ -46,9 +46,11 @@ ccdesue/vits_demo:onnx
 1. please read the source code to better understand
 2. refer to the demo config.json to tail to your own model config
 3. refer the dockerfile 
+4. to use gpu, please install onnxruntime-gpu
 
 ### limitation
-1. only  test  on japanese_cleaners and japanese_cleaners2 in config.json with  [raw vits](https://github.com/jaywalnut310/vits)
+1. only  test  on japanese_cleaners and japanese_cleaners2 in config.json with  [raw vits](https://github.com/jaywalnut310/vits) 
+
 
 
 ### Reference

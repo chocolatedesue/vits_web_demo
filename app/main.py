@@ -77,8 +77,9 @@ def set_infer_view():
     #     inputs=inputs, outputs=outputs,
     #     cache_examples=True
     # )
+    global args
     demo.launch(
-        show_api=True
+        show_api=True,share=args.share
     )
 
 
@@ -106,19 +107,22 @@ def set_gradio_view():
     # )
 
     app.queue(concurrency_count=3)
- 
-    # gr.close_all()
-    app.launch(server_name='0.0.0.0', show_api=False, 
-               share=False)
+
+    global args
+    app.launch(server_name='0.0.0.0', show_api=False,
+               share=args.share)
 
 
 def main():
-    # p = Process(target=Config.init)
-    # p.start()
+
     Config.init()
     set_gradio_view()
     # set_infer_view()
 
 
 if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--share', '-s', type=bool, default=False)
+    args = parser.parse_args()
     main()
