@@ -6,7 +6,7 @@ from loguru import logger
 from tqdm.auto import tqdm
 
 # from app import CONFIG_URL, MODEL_URL
-from gr.app.util import get_hparams_from_file, get_paths, time_it
+from app.util import get_hparams_from_file, get_paths, time_it
 
 # import threading
 
@@ -66,25 +66,18 @@ class Config:
     @classmethod
     @time_it
     def setup_model(cls, model_path: str):
-
         providers = [
-            ('CUDAExecutionProvider', {
-                'device_id': 0,
-                'arena_extend_strategy': 'kNextPowerOfTwo',
-                'gpu_mem_limit': 2 * 1024 * 1024 * 1024,
-                'cudnn_conv_algo_search': 'EXHAUSTIVE',
-                'do_copy_in_default_stream': True,
-            }),
-            'CPUExecutionProvider',
-        ]
-
+            # "DmlExecutionProvider",
+            "OpenVINOExecutionProvider", "CPUExecutionProvider"]
 
         cls.ort_sess = ort.InferenceSession(model_path, providers=providers)
+        # logger.debug(cls.ort_sess.get_providers())
+
         cls.model_warm_up(cls.ort_sess, cls.hps)
         cls.model_is_ok = True
-
+        # cls.ort_sess.get
         logger.info(
-            f"model init done with model path {model_path}"
+            f"model init done with model path {model_path}, providers {cls.ort_sess.get_providers()}"
         )
 
     @classmethod

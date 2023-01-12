@@ -12,6 +12,10 @@ gr/app/.model
 build
 
 monotonic_align/monotonic_align
+/app/.model
+/app/__pycache__
+/app/text/__pycache__
+
 
 # general
 *~

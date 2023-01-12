@@ -1,6 +1,8 @@
 """ from https://github.com/keithito/tacotron """
 import re
 
+from app.util import intersperse
+
 from . import cleaners
 
 _symbol_to_id = None

@@ -19,4 +19,7 @@ pip install -r requirements.txt
 
 function run{
     python -m app.main
+
+    pip uninstall onnxruntime
+    pip install onnxruntime-openvino -U
 }
