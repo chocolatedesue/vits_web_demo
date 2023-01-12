@@ -109,7 +109,7 @@ layout = [
     [sg.Input(key="dir_info", enable_events=True), sg.FolderBrowse(
         key="select_dir")],
     [sg.Button(button_text="load", key="load"), sg.Button(button_text="load default model from Internet"),
-     sg.Text("default model has ~110M"),
+     sg.Text("default model has ~110M", key="desc_model"),
      sg.Text("", visible=False, key="df_model_status")],
     [sg.ProgressBar(key="download_progress", orientation="h", size=(20, 20), visible=False, max_value=100,
                     bar_color=('green', 'white')), sg.Text("status: ", key="model_status", visible=False)],
@@ -149,7 +149,7 @@ while True:
 
 
     elif event == 'load default model from Internet':
-
+        window["desc_model"].update(visible=False)
         default_dir = pathlib.Path(__file__).parent / ".model"
         default_dir.mkdir(exist_ok=True, parents=True)
 
@@ -190,6 +190,7 @@ while True:
             Config.last_save_dir = Path(f_path).parent
             Config.seg.export(f_path, format="wav")
     elif event == "load":
+        window["desc_model"].update(visible=False)
         Config.model_dir_path = Path(values['dir_info'])
         window.start_thread(lambda: window.write_event_value("-init_msg-", Config.init(Config.model_dir_path)),
                             ('-init-', '-init_end-'))
