@@ -1,25 +1,26 @@
 # import os
 # from typing import Optional
-import librosa
 import pathlib
-from loguru import logger
+# import argparse
+import re
+
+import gradio as gr
+import librosa
 import numpy as np
 import torch
+from loguru import logger
 from torch import no_grad, LongTensor
+
 import commons
 import utils
-import gradio as gr
+from config import Config
+from mel_processing import spectrogram_torch
 from models import SynthesizerTrn
 from text import text_to_sequence
 from utils import time_it
-from mel_processing import spectrogram_torch
-# import argparse
-import re
-from config import Config
 
 brackets = ['（', '[', '『', '「', '【', ")", "】", "]", "』", "」", "）"]
 pattern = re.compile('|'.join(map(re.escape, brackets)))
-
 
 # def text_cleanner(text: str):
 #     # text = re.sub(pattern, ' ', text)
@@ -64,13 +65,13 @@ if __name__ == '__main__':
                     vc_output2 = gr.Audio(label="Output Audio")
 
         tts_submit.click(Config.tts_fn, [tts_input1, tts_input2, tts_input3], [
-                         tts_output1, tts_output2]
+            tts_output1, tts_output2]
 
                          )
         vc_submit.click(Config.vc_fn, [vc_input1, vc_input2, vc_input3], [
             vc_output1, vc_output2]
-        )
+                        )
 
     app.queue(concurrency_count=2)
     gr.close_all()
-    app.launch(server_name='0.0.0.0',  show_api=False)
+    app.launch(server_name='0.0.0.0', show_api=False)

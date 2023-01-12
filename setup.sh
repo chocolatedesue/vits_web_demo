@@ -8,7 +8,8 @@ sudo apt-get install cmake build-essential libsndfile-dev -y --no-install-recomm
 poetry export -f requirements.txt -o requirements.txt --without-hashes && \
 pip install  -r requirements.txt
 
-pip3 install torch  --extra-index-url https://download.pytorch.org/whl/cpu
+pip3 install torch==1.13  --extra-index-url https://download.pytorch.org/whl/cpu
+#pip install torch-directml
 
 cd app/monotonic_align && \
 python setup.py build_ext --inplace && \

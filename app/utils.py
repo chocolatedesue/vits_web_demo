@@ -1,16 +1,17 @@
-import io
-import os
-import glob
-import pathlib
-import sys
 import argparse
-import logging
+import glob
+import io
 import json
+import logging
+import os
+import pathlib
 import subprocess
+import sys
 from typing import Optional
+
 import numpy as np
-from scipy.io.wavfile import read
 import torch
+from scipy.io.wavfile import read
 
 MATPLOTLIB_FLAG = False
 
@@ -44,7 +45,7 @@ def load_checkpoint(checkpoint, model, optimizer=None):
         model.module.load_state_dict(new_state_dict)
     else:
         model.load_state_dict(new_state_dict)
-    logger.info("Loaded checkpoint '{}' (iteration {})" .format(
+    logger.info("Loaded checkpoint '{}' (iteration {})".format(
         checkpoint, iteration))
     return model, optimizer, learning_rate, iteration
 
@@ -191,7 +192,7 @@ def get_hparams_from_dir(model_dir):
 def get_hparams_from_file(config_object):
     # assert isinstance(config_object, io.IOBase)
     if isinstance(config_object, str):
-        with open(config_object, "r") as f:
+        with open(config_object, "r", encoding="utf-8") as f:
             data = f.read()
         config = json.loads(data)
     elif isinstance(config_object, bytes):
@@ -291,8 +292,9 @@ def time_it(func: callable):
         # end = time.time()
         end = time.perf_counter()
         # print(f"func {func.__name__} cost {end-start} seconds")
-        logger.info(f"func {func.__name__} cost {end-start} seconds")
+        logger.info(f"func {func.__name__} cost {end - start} seconds")
         return res
+
     return wrapper
 
 
@@ -311,7 +313,7 @@ def download_defaults(model_path: pathlib.Path, config_path: pathlib.Path):
         CHUNK_SIZE = 1024 * 1024
         response = requests.get(url, stream=True)
         with tqdm(total=file_size, unit="B",
-                  unit_scale=True, desc="progress",  colour="green") as pbar:
+                  unit_scale=True, desc="progress", colour="green") as pbar:
 
             with open(save_path, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
@@ -327,7 +329,6 @@ def download_defaults(model_path: pathlib.Path, config_path: pathlib.Path):
 
 
 def get_paths(dir_path: pathlib.Path):
-
     model_path: pathlib.Path = find_path_by_suffix(dir_path, "pth")
     config_path: pathlib.Path = find_path_by_suffix(dir_path, "json")
     # if not model_path or not config_path:

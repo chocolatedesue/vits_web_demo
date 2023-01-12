@@ -1,23 +1,25 @@
-import os
+import re
+# import onnxruntime as ort
+import threading
 from pathlib import Path
-from loguru import logger
+from re import Pattern
+
+import librosa
 import numpy as np
 # from app import ,
 # from app.util import get_hparams_from_file, get_paths, time_it
 import requests
 import torch
+from loguru import logger
 from tqdm.auto import tqdm
-import re
-import librosa
-from re import Pattern
-# import onnxruntime as ort
-import threading
-from mel_processing import spectrogram_torch
-from text import text_to_sequence
+
 import commons
+from mel_processing import spectrogram_torch
 from models import SynthesizerTrn
+from text import text_to_sequence
 from utils import get_hparams_from_file
 from utils import get_paths, time_it, load_checkpoint
+
 MODEL_URL = 'https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJlemNoNnJRRWRiM2NaZms/root/content'
 CONFIG_URL = 'https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhM1lzQ0Zzakl3dnQ5NDg/root/content'
 
@@ -37,6 +39,8 @@ class Config:
         cls.pattern = re.compile('|'.join(map(re.escape, brackets)))
         cls.device = torch.device(
             'cuda' if torch.cuda.is_available() else 'cpu')
+        # import torch_directml
+        # cls.device = torch_directml.device()
         dir_path = Path(__file__).parent.absolute() / ".model"
         dir_path.mkdir(
             parents=True, exist_ok=True
@@ -49,7 +53,7 @@ class Config:
             logger.warning(
                 "unable to find model or config, try to download default model and config"
             )
-            cfg = requests.get(CONFIG_URL,  timeout=5).content
+            cfg = requests.get(CONFIG_URL, timeout=5).content
             with open(str(config_path), 'wb') as f:
                 f.write(cfg)
             cls.setup_config(str(config_path))
@@ -107,7 +111,7 @@ class Config:
     def setup_config(cls, config_path: str):
         cls.hps = get_hparams_from_file(config_path)
         cls.speaker_choices = list(
-            map(lambda x: str(x[0])+":"+x[1], enumerate(cls.hps.speakers)))
+            map(lambda x: str(x[0]) + ":" + x[1], enumerate(cls.hps.speakers)))
 
         logger.info(
             f"config init done with config path {config_path}"
@@ -118,7 +122,7 @@ class Config:
         # copy from https://github.com/tqdm/tqdm/blob/master/examples/tqdm_requests.py
         file_size = int(requests.head(url).headers["Content-Length"])
         response = requests.get(url, stream=True)
-        with tqdm(total=file_size,  unit='B', unit_scale=True, unit_divisor=1024, miniters=1,
+        with tqdm(total=file_size, unit='B', unit_scale=True, unit_divisor=1024, miniters=1,
                   desc="model download") as pbar:
 
             with open(save_path, 'wb') as f:
@@ -132,7 +136,7 @@ class Config:
     def get_text(cls, text):
         Config.pattern.sub(' ', text)
         text_norm = text_to_sequence(
-            text, Config.hps.symbols,  Config.hps.data.text_cleaners)
+            text, Config.hps.symbols, Config.hps.data.text_cleaners)
         if Config.hps.data.add_blank:
             text_norm = commons.intersperse(text_norm, 0)
         # text_norm = LongTensor(text_norm)
@@ -155,7 +159,8 @@ class Config:
             x_tst_lengths = torch.LongTensor(
                 [stn_tst.size(0)]).to(Config.device)
             sid = torch.LongTensor([speaker_id]).to(Config.device)
-            audio = Config.model.infer(x_tst, x_tst_lengths, sid=sid, noise_scale=.667, noise_scale_w=0.8, length_scale=1.0/speed)[0][
+            audio = Config.model.infer(x_tst, x_tst_lengths, sid=sid, noise_scale=.667, noise_scale_w=0.8,
+                                       length_scale=1.0 / speed)[0][
                 0, 0].data.cpu().float().numpy()
         return "Success", (Config.hps.data.sampling_rate, audio)
 
@@ -185,7 +190,8 @@ class Config:
             y = torch.FloatTensor(audio).to(Config.device)
             y = y.unsqueeze(0)
             spec = spectrogram_torch(y, Config.hps.data.filter_length,
-                                     Config.hps.data.sampling_rate, Config.hps.data.hop_length, Config.hps.data.win_length,
+                                     Config.hps.data.sampling_rate, Config.hps.data.hop_length,
+                                     Config.hps.data.win_length,
                                      center=False).to(Config.device)
 
             spec_lengths = torch.LongTensor([spec.size(-1)]).to(Config.device)
