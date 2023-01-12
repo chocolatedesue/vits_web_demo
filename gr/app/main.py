@@ -1,5 +1,5 @@
 # from multiprocessing import Process
-import gradio as gr
+import gr as gr
 import numpy as np
 from loguru import logger
 

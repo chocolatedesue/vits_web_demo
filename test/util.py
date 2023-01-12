@@ -1,9 +1,9 @@
 import json
 from pathlib import Path
-from typing import Optional
+
+import numpy as np
 import onnxruntime as ort
 from loguru import logger
-import numpy as np
 
 
 def time_it(func: callable):
@@ -16,9 +16,11 @@ def time_it(func: callable):
         # end = time.time()
         end = time.perf_counter()
         # print(f"func {func.__name__} cost {end-start} seconds")
-        logger.info(f"func {func.__name__} cost {end-start} seconds")
+        logger.info(f"func {func.__name__} cost {end - start} seconds")
         return res
+
     return wrapper
+
 
 # def construct_ort_input( ):
 
@@ -97,7 +99,6 @@ def intersperse(lst, item):
 
 
 def get_paths(dir_path: Path):
-
     model_path: Path = find_path_by_suffix(dir_path, "onnx")
     config_path: Path = find_path_by_suffix(dir_path, "json")
     return model_path, config_path

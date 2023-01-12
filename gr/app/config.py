@@ -6,7 +6,7 @@ from loguru import logger
 from tqdm.auto import tqdm
 
 # from app import CONFIG_URL, MODEL_URL
-from app.util import get_hparams_from_file, get_paths, time_it
+from gr.app.util import get_hparams_from_file, get_paths, time_it
 
 # import threading
 

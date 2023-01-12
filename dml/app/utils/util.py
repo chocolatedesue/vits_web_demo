@@ -1,9 +1,9 @@
 import json
 from pathlib import Path
-from typing import Optional
+
+import numpy as np
 import onnxruntime as ort
 from loguru import logger
-import numpy as np
 
 
 def time_it(func: callable):
@@ -17,17 +17,19 @@ def time_it(func: callable):
         end = time.perf_counter()
         # print(f"func {func.__name__} cost {end-start} seconds")
         logger.info(f"func {func.__name__} cost {end - start} seconds")
+        # if window:
+        #     window.write_event_value(f"-tts_time-", end - start)
         return res
 
     return wrapper
 
 
 @time_it
-def ort_infer(ort_sess: ort.InferenceSession, ort_inputs: dict):
+def ort_infer(ort_sess: ort.InferenceSession, ort_inputs: dict) -> np.array:
     audio = np.squeeze(ort_sess.run(None, ort_inputs))
     audio *= 32767.0 / max(0.01, np.max(np.abs(audio))) * 0.6
     audio: np.array = np.clip(audio, -32767.0, 32767.0)
-    return audio
+    return audio.astype(np.int16)
 
 
 class HParams():
@@ -71,7 +73,7 @@ def get_hparams_from_file(config_path):
     return hparams
 
 
-def find_path_by_suffix(dir_path: Path, suffix: Path):
+def find_path_by_suffix(dir_path: Path, suffix: str):
     assert dir_path.is_dir()
 
     for path in dir_path.glob(f"*.{suffix}"):

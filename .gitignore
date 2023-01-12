@@ -4,6 +4,8 @@ DUMMY3
 logs
 __pycache__
 .ipynb_checkpoints
+
+
 # Customize 
 *.wav
 model/
@@ -12,13 +14,15 @@ model/
 /bin
 *.secret
 *.env
-.*.swp
+*.swp
+build/
+dist/
 
 *.so
 *.c
 *.pyc
 build
-app/.model
+gr/app/.model
 monotonic_align/monotonic_align
 
 # general

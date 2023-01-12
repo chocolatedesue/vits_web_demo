@@ -37,7 +37,7 @@ ort_inputs = {
     'sid': sid
 }
 
-# from util import model_pre_activate
+# from mess import model_pre_activate
 
 util.model_warm_up(ort_sess, hps)
 # start_time = time.time()

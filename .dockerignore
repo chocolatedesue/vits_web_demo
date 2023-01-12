@@ -8,7 +8,7 @@ __pycache__
 *.so
 *.c
 *.pyc
-app/.model
+gr/app/.model
 build
 
 monotonic_align/monotonic_align
