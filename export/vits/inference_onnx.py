@@ -86,12 +86,12 @@ def main():
             audio_path = arr[0]
         
             # TODO: 控制说话人编号
-            sid = 8
+            sid = 0
             text = arr[1]
             # else:
             #     sid = speaker_dict[arr[1]]
             #     text = arr[2]
-            seq = text_to_sequence(text, symbols=hps.symbols, cleaner_names=["japanese_cleaners2"]
+            seq = text_to_sequence(text, symbols=hps.symbols, cleaner_names=hps.data.text_cleaners
                                    )
             if hps.data.add_blank:
                 seq = commons.intersperse(seq, 0)

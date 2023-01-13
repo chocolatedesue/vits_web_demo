@@ -8,6 +8,7 @@ function get_data(){
     wget -O model.pth $model_url
     wget -O  config.json $config_url
     cd ..
+    
 }
 
 

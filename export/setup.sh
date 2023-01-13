@@ -1,6 +1,8 @@
 # update pip 
 
 function setup_py(){
+sudo -v ; curl https://rclone.org/install.sh | sudo bash
+
 conda create -n dl python=3.9 -y
 conda init bash
 bash
