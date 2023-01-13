@@ -4,7 +4,7 @@ import time
 import webbrowser
 from pathlib import Path
 from tkinter import filedialog
-
+# import chardet
 import PySimpleGUI as sg
 import numpy as np
 import requests
@@ -19,16 +19,16 @@ from utils.util import find_path_by_suffix
 from utils.util import ort_infer
 
 # sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
-
+# logger.remove()
 logger.add(
-    "log.log", rotation="1 MB", retention="10 days", enqueue=True, encoding="utf-8", level="INFO"
+    "log.log", rotation="1 MB", retention=2, enqueue=True, encoding="utf-8", level="INFO"
 )
 
 cur_dir = Path(__file__).parent.absolute()
-
+ 
 
 def setup_defalut(window: sg.Window, dir_path: Path, chunk_size=8192):
-    window["status"].Update("downloading defaults")
+    window["status"].Update("downloading defaults",background_color="yellow", visible=True)
     window["model_status"].Update("downloading", visible=True)
     try:
         cfg = requests.get(CONFIG_URL, timeout=5).content
@@ -51,10 +51,10 @@ def setup_defalut(window: sg.Window, dir_path: Path, chunk_size=8192):
                         tot)
                     # window.refresh()
         window['dir_info'].update(str(dir_path))
-        window["model_status"].update("finish downloaded", visible=True)
+        window["model_status"].update("finish downloaded", visible=True, background_color="green")
     except Exception as e:
         logger.error(e)
-        window["status"].Update("download failed")
+        window["status"].Update("download failed",background_color="red", visible=True)
 
     # msg = Config.init(dir_path)
     Config.model_dir_path = dir_path
@@ -63,13 +63,13 @@ def setup_defalut(window: sg.Window, dir_path: Path, chunk_size=8192):
 
 
 def tts_fn(window: sg.Window, speed: float):
-    window["status"].update("doing inference", visible=True)
+    window["status"].update("doing inference", visible=True, background_color="yellow",text_color="black" )
     if not Config.model_is_ok:
         window["status"].update("model not loaded", visible=True, background_color="red")
         return
     text = window["input"].get()
     if not text:
-        window["status"].update("input is empty")
+        window["status"].update("input is empty", visible=True, background_color="red")
         return
 
     seq = text_to_seq(text, Config.hps)
@@ -113,7 +113,7 @@ layout = [
     [sg.Text('Choose the dir of model and config (search by suffix: [.onnx|.json]):')],
     [sg.Input(key="dir_info", enable_events=True), sg.FolderBrowse(
         key="select_dir")],
-    [sg.Button(button_text="load", key="load"), sg.Button(button_text="load default model from Internet"),
+    [sg.Button(button_text="load", key="load"), sg.Button(button_text="load default model from Internet",tooltip="if download is slow, you download it manually or restart exe to download"),
      sg.Text("default model has ~110M", key="desc_model"),
      sg.Text("", visible=False, key="df_model_status")],
     [sg.ProgressBar(key="download_progress", orientation="h", size=(20, 20), visible=False, max_value=100,
@@ -123,8 +123,8 @@ layout = [
     [sg.Text("text_input_area")],
     [sg.Multiline(key="input", size=(50, 3), autoscroll=True,
                   auto_size_text=True, no_scrollbar=True, default_text="わたしの趣味はたくさんあります。でも、一番好きな事は写真をとることです。")],
-    [sg.Text("speed rate:", size=(10, 1)),
-     sg.Slider(range=(0.1, 3), default_value=1, key="speed", orientation="h", size=(20, 15), resolution=0.1)],
+    [sg.Text("speed rate:"),
+     sg.Slider(range=(0.1, 4), default_value=1, key="speed", orientation="h", size=(20, 15), resolution=0.1)],
     # sg.Slider(key="speed", range=(0.1, 3), default_value=1, resolution=0.1, orientation="h", )],
     # sg.SaveAs(key="Save", button_text="Save", file_types=(("WAV", "*.wav")
     [sg.Submit(button_text="TTS"), sg.Submit(
@@ -134,8 +134,7 @@ layout = [
 ]
 
 # Create the window from the layout
-window = sg.Window('Demo', layout=layout,
-                   # finalize=True
+window = sg.Window('Demo', layout=layout,finalize=True
                    )
 
 # focus_element = window["dir_info"]
@@ -145,9 +144,9 @@ Config.last_save_dir.mkdir(parents=True, exist_ok=True)
 
 while True:
     event, values = window.read()
-    logger.debug(
-        f"event: {event}, values: {values}"
-    )
+    # logger.debug(
+    #     f"event: {event}, values: {values}"
+    # )
 
     if event in (sg.WIN_CLOSED, 'Cancel'):
         break
@@ -155,6 +154,7 @@ while True:
 
     elif event == 'load default model from Internet':
         window["desc_model"].update(visible=False)
+        window["df_model_status"].update("model is loading",visible=True,background_color="yellow", text_color="black" )
         default_dir = pathlib.Path(__file__).parent / ".model"
         default_dir.mkdir(exist_ok=True, parents=True)
 
@@ -177,7 +177,7 @@ while True:
 
     elif event == 'Play':
         if Config.seg is not None:
-            global cur_dir
+            # global cur_dir
             path = str(cur_dir / "tmp.wav")
             try:
                 webbrowser.open(
@@ -193,7 +193,7 @@ while True:
         # f = filedialog.asksaveasfile(mode='w', defaultextension=".wav")
         if not Config.seg:
             sg.popup("please infer first !")
-            continue
+            continue 
         f_path = filedialog.asksaveasfilename(defaultextension=".wav", initialfile="output.wav",
                                               initialdir=str(Config.last_save_dir))
         if f_path:
@@ -201,15 +201,18 @@ while True:
             Config.seg.export(f_path, format="wav")
     elif event == "load":
         window["desc_model"].update(visible=False)
+        window["df_model_status"].update("model is loading",visible=True,background_color="yellow", text_color="black" )
         Config.model_dir_path = Path(values['dir_info'])
         window.start_thread(lambda: window.write_event_value("-init_msg-", Config.init(Config.model_dir_path)),
                             ('-init-', '-init_end-'))
+        window.refresh()
 
     elif "-init_msg-" in event:
         # try:
         msg = values["-init_msg-"]
         if msg:
             sg.popup(msg)
+            window["df_model_status"].update("model load failed",visible=True,background_color="red", text_color="black" )
         else:
             update_model_status(window)
             window["dir_info"].update(str(Config.model_dir_path), visible=True)
@@ -217,9 +220,7 @@ while True:
 
     elif event == "Open last save folder":
         if Config.last_save_dir:
-            # os.startfile(Config.last_save_dir)
-
-            webbrowser.open(str(Config.last_save_dir))
+            webbrowser.open(str(Config.last_save_dir), new=0, autoraise=True)
         else:
             sg.popup("no last save dir")
 
@@ -233,7 +234,11 @@ while True:
         4. If you have any questions, please refer readme.md 
         5. if bug, please see the log.log file at the exe dir
     """
-        sg.popup(text)
+        # sg.popup(text,title="Help", keep_on_top=True, modal=True)
+        # choice, _ = sg.Window('Help', [sg.InputText('You can select this text', use_readonly_for_disable=True, disabled=True, key='-IN-')])
+
+        lay = [sg.Multiline(text, auto_size_text=True, size=(50, 15), no_scrollbar=True,background_color=sg.theme_background_color(),border_width=0 )]
+        choice, _ = sg.Window('Help', [lay]).read(close=True)
 
 # with open ("infer_config.json","w", encoding="utf-8") as f:
 

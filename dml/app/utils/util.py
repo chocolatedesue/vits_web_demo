@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import time
 
 import numpy as np
 import onnxruntime as ort
@@ -7,8 +8,7 @@ from loguru import logger
 
 
 def time_it(func: callable):
-    import time
-
+    
     def wrapper(*args, **kwargs):
         # start = time.time()
         start = time.perf_counter()

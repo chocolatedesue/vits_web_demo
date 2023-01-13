@@ -1,7 +1,6 @@
-# py=3.7
 
 pysimplegui
-# pyopenjtalk==0.3.0
+pyopenjtalk==0.3.0
 loguru
 pydub
 requests
