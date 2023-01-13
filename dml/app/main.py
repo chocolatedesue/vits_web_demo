@@ -1,7 +1,7 @@
 import pathlib
 # import  time
-import sys
 import time
+import webbrowser
 from pathlib import Path
 from tkinter import filedialog
 
@@ -10,6 +10,7 @@ import numpy as np
 import requests
 from loguru import logger
 from pydub import AudioSegment
+from pydub.playback import play
 
 from text import text_to_seq
 # from config import /
@@ -17,11 +18,13 @@ from utils.config import MODEL_URL, CONFIG_URL, Config
 from utils.util import find_path_by_suffix
 from utils.util import ort_infer
 
-sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
+# sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
 
 logger.add(
     "log.log", rotation="1 MB", retention="10 days", enqueue=True, encoding="utf-8", level="INFO"
 )
+
+cur_dir = Path(__file__).parent.absolute()
 
 
 def setup_defalut(window: sg.Window, dir_path: Path, chunk_size=8192):
@@ -90,7 +93,9 @@ def tts_fn(window: sg.Window, speed: float):
     end_time = time.perf_counter()
     Config.seg = AudioSegment(
         audio_data.tobytes(), sample_width=2, frame_rate=Config.hps.data.sampling_rate, channels=1)
-
+    # Config.seg.export("tmp.wav", format="wav")
+    global cur_dir
+    Config.seg.export(str(cur_dir / "tmp.wav"), format="wav")
     window["status"].update(f"generate {Config.seg.duration_seconds} with elapsed {end_time - start_time} ",
                             visible=True,
                             background_color="green")
@@ -117,7 +122,7 @@ layout = [
                                   key="speaker", default_value=Config.speaker_choices[0], size=(20, 1))],
     [sg.Text("text_input_area")],
     [sg.Multiline(key="input", size=(50, 3), autoscroll=True,
-                  auto_size_text=True, no_scrollbar=True)],
+                  auto_size_text=True, no_scrollbar=True, default_text="わたしの趣味はたくさんあります。でも、一番好きな事は写真をとることです。")],
     [sg.Text("speed rate:", size=(10, 1)),
      sg.Slider(range=(0.1, 3), default_value=1, key="speed", orientation="h", size=(20, 15), resolution=0.1)],
     # sg.Slider(key="speed", range=(0.1, 3), default_value=1, resolution=0.1, orientation="h", )],
@@ -172,9 +177,14 @@ while True:
 
     elif event == 'Play':
         if Config.seg is not None:
-            from pydub.playback import play
-
-            window.start_thread(lambda: play(Config.seg), ('--', '---'))
+            global cur_dir
+            path = str(cur_dir / "tmp.wav")
+            try:
+                webbrowser.open(
+                    f"file://{path}", new=0, autoraise=True)
+            except Exception as e:
+                logger.error(e)
+                window.start_thread(lambda: play(Config.seg), ('--', '---'))
         else:
             window["status"].update("audio data is None, please infer first !", background_color="red",
                                     visible=True)
@@ -208,9 +218,8 @@ while True:
     elif event == "Open last save folder":
         if Config.last_save_dir:
             # os.startfile(Config.last_save_dir)
-            import webbrowser
 
-            webbrowser.open(Config.last_save_dir)
+            webbrowser.open(str(Config.last_save_dir))
         else:
             sg.popup("no last save dir")
 
