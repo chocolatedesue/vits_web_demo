@@ -35,12 +35,15 @@ class Config:
             cls.setup_model(str(model_path))
         except Exception as e:
             logger.error(e)
-            return "unable to setup model or config, may be the model is damaged"
+            return f"""maybe model is damaged
+please remove the model and redownload again.
+error: {str(e)}
+            """
         return None
 
     @classmethod
     @time_it
-    @logger.catch
+    # @logger.catch
     def setup_model(cls, model_path: str):
         provider = ['DmlExecutionProvider', 'CPUExecutionProvider']
         so = ort.SessionOptions()
@@ -58,7 +61,7 @@ class Config:
             raise e
 
     @classmethod
-    @logger.catch
+    # @logger.catch
     def setup_config(cls, config_path: str):
         cls.hps = get_hparams_from_file(config_path)
         cls.speaker_choices = list(

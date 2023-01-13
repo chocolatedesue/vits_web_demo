@@ -28,7 +28,7 @@ cur_dir = Path(__file__).parent.absolute()
  
 
 def setup_defalut(window: sg.Window, dir_path: Path, chunk_size=8192):
-    window["status"].Update("downloading defaults",background_color="yellow", visible=True)
+    # window["status"].Update("downloading defaults",background_color="yellow", visible=True)
     window["model_status"].Update("downloading", visible=True)
     try:
         cfg = requests.get(CONFIG_URL, timeout=5).content
@@ -54,16 +54,25 @@ def setup_defalut(window: sg.Window, dir_path: Path, chunk_size=8192):
         window["model_status"].update("finish downloaded", visible=True, background_color="green")
     except Exception as e:
         logger.error(e)
-        window["status"].Update("download failed",background_color="red", visible=True)
+        window["model_status"].update(visible=False)
+        window["df_model_status"].update("downaload fail",visible=True, background_color="red" )
+        text =     f"""download failed, please check your network
+error: {e}
+            """
+        lay = [sg.Multiline(text, auto_size_text=True, size=(50, 15), no_scrollbar=True,background_color=sg.theme_background_color(),border_width=0 ,text_color="white",disabled=True)]
+        sg.Window('download fail', [lay],finalize=True).read(close=True)
 
-    # msg = Config.init(dir_path)
+
+        
+        return 
+
     Config.model_dir_path = dir_path
     window.start_thread(lambda: window.write_event_value("-init_msg-", Config.init(Config.model_dir_path)),
                         ('-init-', '-init_end-'))
 
 
 def tts_fn(window: sg.Window, speed: float):
-    window["status"].update("doing inference", visible=True, background_color="yellow",text_color="black" )
+    window["status"].update("doing inference", visible=True, background_color="yellow",text_color="black")
     if not Config.model_is_ok:
         window["status"].update("model not loaded", visible=True, background_color="red")
         return
@@ -157,11 +166,12 @@ while True:
         window["df_model_status"].update("model is loading",visible=True,background_color="yellow", text_color="black" )
         default_dir = pathlib.Path(__file__).parent / ".model"
         default_dir.mkdir(exist_ok=True, parents=True)
+        window["dir_info"].update(str(default_dir))
 
         cfg_path = find_path_by_suffix(default_dir, "json")
         model_path = find_path_by_suffix(default_dir, "onnx")
-
-        if not cfg_path and not model_path:
+        logger.warning(f"cfg_path: {cfg_path}, model_path: {model_path}")
+        if not cfg_path or not model_path:
             window.start_thread(lambda: setup_defalut(
                 window, default_dir), ('-THREAD-', '-THEAD ENDED-'))
 
@@ -211,7 +221,7 @@ while True:
         # try:
         msg = values["-init_msg-"]
         if msg:
-            sg.popup(msg)
+            sg.popup(msg,keep_on_top=True)
             window["df_model_status"].update("model load failed",visible=True,background_color="red", text_color="black" )
         else:
             update_model_status(window)
@@ -237,8 +247,8 @@ while True:
         # sg.popup(text,title="Help", keep_on_top=True, modal=True)
         # choice, _ = sg.Window('Help', [sg.InputText('You can select this text', use_readonly_for_disable=True, disabled=True, key='-IN-')])
 
-        lay = [sg.Multiline(text, auto_size_text=True, size=(50, 15), no_scrollbar=True,background_color=sg.theme_background_color(),border_width=0 )]
-        choice, _ = sg.Window('Help', [lay]).read(close=True)
+        lay = [sg.Multiline(text, auto_size_text=True, size=(50, 15), no_scrollbar=True,background_color=sg.theme_background_color(),border_width=0 ,text_color="white",disabled=True)]
+        sg.Window('Help', [lay],finalize=True).read(close=True)
 
 # with open ("infer_config.json","w", encoding="utf-8") as f:
 
