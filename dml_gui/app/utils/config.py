@@ -43,13 +43,13 @@ error: {str(e)}
 
     @classmethod
     @time_it
-    # @logger.catch
     def setup_model(cls, model_path: str):
         provider = ['DmlExecutionProvider', 'CPUExecutionProvider']
         so = ort.SessionOptions()
-        # For CPUExecutionProvider you can change it to True
         so.enable_mem_pattern = False
         try:
+            if cls.ort_sess:
+                del cls.ort_sess
             cls.ort_sess = ort.InferenceSession(
                 model_path, providers=provider, sess_options=so)
             model_warm_up(cls.ort_sess, cls.hps)

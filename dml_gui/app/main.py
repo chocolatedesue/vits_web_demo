@@ -105,7 +105,7 @@ def tts_fn(window: sg.Window, speed: float):
     # Config.seg.export("tmp.wav", format="wav")
     global cur_dir
     Config.seg.export(str(cur_dir / "tmp.wav"), format="wav")
-    window["status"].update(f"generate {Config.seg.duration_seconds} with elapsed {end_time - start_time} ",
+    window["status"].update(f"generate {Config.seg.duration_seconds}, elapse: {end_time - start_time} ",
                             visible=True,
                             background_color="green")
 
@@ -122,7 +122,7 @@ layout = [
     [sg.Text('Choose the dir of model and config (search by suffix: [.onnx|.json]):')],
     [sg.Input(key="dir_info", enable_events=True), sg.FolderBrowse(
         key="select_dir")],
-    [sg.Button(button_text="load", key="load"), sg.Button(button_text="load default model from Internet",tooltip="if download is slow, you download it manually or restart exe to download"),
+    [sg.Button(button_text="load", key="load",tooltip="can also be used to manually clear infer memory usage"), sg.Button(button_text="load default model from Internet",tooltip="if download is slow, you download it manually or restart exe to download"),
      sg.Text("default model has ~110M", key="desc_model"),
      sg.Text("", visible=False, key="df_model_status")],
     [sg.ProgressBar(key="download_progress", orientation="h", size=(20, 20), visible=False, max_value=100,
@@ -143,7 +143,7 @@ layout = [
 ]
 
 # Create the window from the layout
-window = sg.Window('Demo', layout=layout,finalize=True
+window = sg.Window('onnx_directml_demo', layout=layout,finalize=True
                    )
 
 # focus_element = window["dir_info"]
@@ -163,11 +163,11 @@ while True:
 
     elif event == 'load default model from Internet':
         window["desc_model"].update(visible=False)
-        window["df_model_status"].update("model is loading",visible=True,background_color="yellow", text_color="black" )
+        window["df_model_status"].update("model is loading",visible=True,background_color="yellow", text_color="black")
         default_dir = pathlib.Path(__file__).parent / ".model"
         default_dir.mkdir(exist_ok=True, parents=True)
         window["dir_info"].update(str(default_dir))
-
+        window.refresh()
         cfg_path = find_path_by_suffix(default_dir, "json")
         model_path = find_path_by_suffix(default_dir, "onnx")
         logger.warning(f"cfg_path: {cfg_path}, model_path: {model_path}")
@@ -211,11 +211,12 @@ while True:
             Config.seg.export(f_path, format="wav")
     elif event == "load":
         window["desc_model"].update(visible=False)
-        window["df_model_status"].update("model is loading",visible=True,background_color="yellow", text_color="black" )
+        window["df_model_status"].update("model is loading",visible=True,background_color="yellow", text_color="black",)
+        window.refresh()
         Config.model_dir_path = Path(values['dir_info'])
         window.start_thread(lambda: window.write_event_value("-init_msg-", Config.init(Config.model_dir_path)),
                             ('-init-', '-init_end-'))
-        window.refresh()
+        # window.refresh()
 
     elif "-init_msg-" in event:
         # try:

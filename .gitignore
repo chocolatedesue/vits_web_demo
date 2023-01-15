@@ -8,6 +8,7 @@ __pycache__
 
 # Customize 
 *.wav
+*.dist
 model/
 *.json
 *.onnx 
