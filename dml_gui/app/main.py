@@ -129,7 +129,7 @@ layout = [
                     bar_color=('green', 'white')), sg.Text("status: ", key="model_status", visible=False)],
     [sg.Text("speaker"), sg.Combo(Config.speaker_choices,
                                   key="speaker", default_value=Config.speaker_choices[0], size=(20, 1))],
-    [sg.Text("text_input_area")],
+    [sg.Multiline("text_input_area, attention: inputs vary according model config, like  [JA]こんにちは。[JA][ZH]你好。[ZH]",no_scrollbar=True,disabled=True,background_color=sg.theme_background_color(),text_color="white",size=(50, 3),  auto_size_text=True,border_width=0)],
     [sg.Multiline(key="input", size=(50, 3), autoscroll=True,
                   auto_size_text=True, no_scrollbar=True, default_text="わたしの趣味はたくさんあります。でも、一番好きな事は写真をとることです。")],
     [sg.Text("speed rate:"),
@@ -209,6 +209,7 @@ while True:
         if f_path:
             Config.last_save_dir = Path(f_path).parent
             Config.seg.export(f_path, format="wav")
+
     elif event == "load":
         window["desc_model"].update(visible=False)
         window["df_model_status"].update("model is loading",visible=True,background_color="yellow", text_color="black",)

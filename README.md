@@ -34,7 +34,7 @@ ccdesue/vits_demo:onnx
 
 ### limitation
 
-1. only test on japanese_cleaners and japanese_cleaners2 in config.json
+1. only test on japanese_cleaners2 and zh_ja_mixture_cleaners in config.json
    with  [raw vits](https://github.com/jaywalnut310/vits)
 
 ### Reference

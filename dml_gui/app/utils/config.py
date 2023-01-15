@@ -19,7 +19,7 @@ class Config:
     model_is_ok: bool = False
     hps: HParams = None
     speaker_choices: list = ["none"]
-    audio_data: np.array = None
+    # audio_data: np.array = None
     seg: AudioSegment = None
 
     @classmethod

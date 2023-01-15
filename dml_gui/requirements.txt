@@ -6,3 +6,6 @@ pydub
 requests
 onnxruntime-directml
 unidecode
+pypinyin
+jieba
+cn2an

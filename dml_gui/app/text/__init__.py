@@ -1,12 +1,16 @@
 """ from https://github.com/keithito/tacotron """
 import json
 import re
-
+import pyopenjtalk
+from pypinyin import lazy_pinyin, BOPOMOFO
+import jieba
+import cn2an
 from . import cleaners
 
 _symbol_to_id = None
 pattern = None
-
+jieba.initialize()
+pyopenjtalk._lazy_init()
 
 def intersperse(lst, item):
     result = [item] * (len(lst) * 2 + 1)
@@ -21,10 +25,13 @@ def build_pattern():
 
 
 def text_to_seq(text: str, hps):
-    global pattern
-    if not pattern:
-        pattern = build_pattern()
-    text = pattern.sub(' ', text).strip()
+
+    if "japanese_cleaners" in hps.data.text_cleaners:
+        global pattern
+        if not pattern:
+            pattern = build_pattern()
+        text = pattern.sub(' ', text).strip()
+        
     text_norm = text_to_sequence(
         text, hps.symbols, hps.data.text_cleaners)
     if hps.data.add_blank:

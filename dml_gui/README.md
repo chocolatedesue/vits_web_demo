@@ -11,6 +11,7 @@ pyinstaller.exe `
 --windowed
 
 # nuitka with cl.exe
-python -m nuitka --standalone .\main.py --enable-plugin=tk-inter --disable-console
+python -m nuitka --standalone .\main.py --enable-plugin=tk-inter --disable-console `
+--output-dir onnx_directml 
 ```
 
