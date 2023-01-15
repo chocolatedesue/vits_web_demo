@@ -9,6 +9,7 @@ __pycache__
 # Customize 
 *.wav
 model/
+*.json
 *.onnx 
 *.pth
 /bin
