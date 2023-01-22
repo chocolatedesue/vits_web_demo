@@ -1,1 +1,1 @@
-act -j build_wheels --secret-file .secrets
+act -j upload_wheel --secret-file ./test/.secrets
