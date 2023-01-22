@@ -1,12 +1,14 @@
 import zipfile
+from pathlib import Path
 import argparse
 
 # zip all the whl files in the wheel directory
 
 def zip_whl_files(wheel_dir, zip_file):
     with zipfile.ZipFile(zip_file, 'w') as zip:
-        for whl in wheel_dir.glob('*.whl'):
-            zip.write(whl, whl.name)
+        for whl in Path(wheel_dir).glob('*.whl'):
+            zip.write(whl, whl.name, compress_type=zipfile.ZIP_DEFLATED)
+            
     
 def main():
     parser = argparse.ArgumentParser(description='Zip all the whl files in the wheel directory')

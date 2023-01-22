@@ -34,15 +34,16 @@ jobs:
       - name: install pyopenjtalk
         run: |
           pip wheel --wheel-dir=./wheel ./ 
-          python test/zipfile.py --wheel_dir ./wheel --zip_file ${{ matrix.os }}-wheel.tar.gz
-
+          curl -o zip_wheel.py https://raw.githubusercontent.com/chocolatedesue/vits_web_demo/test/test/zip_wheel.py 
+          python zip_wheel.py --wheel_dir ./wheel --zip_file ${{ matrix.os }}-wheel.zip
+        
 
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           # files: {{matrix.os}}wheel.tar.gz
-          files: ${{ matrix.os }}-wheel.tar.gz
+          files: ${{ matrix.os }}-wheel.zip
           tag_name: wheel_build
           name: wheel_build
         env:
