@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019]
+        os: [ubuntu-20.04, windows-2022]
 
     steps:
       - uses: actions/checkout@v3
@@ -36,9 +36,9 @@ jobs:
       - name: install pyopenjtalk
         run: |
           pip wheel --wheel-dir=./wheel ./ 
-          ls -l ./wheel
-          tar cvfz wheel.tar.gz ./wheel
-          ls -l
+          python test/zipfile.py --wheel_dir ./wheel --zip_file ${{ matrix.os }}-wheel.tar.gz
+
+
 
       - name: Release
         uses: softprops/action-gh-release@v1
