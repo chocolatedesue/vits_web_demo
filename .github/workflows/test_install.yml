@@ -2,7 +2,7 @@ name: upload wheel
 
 on:
   workflow_dispatch:
-  
+
   push:
     tags:
       - "v*.*.*"
@@ -24,15 +24,13 @@ jobs:
           # token: ${{ secrets.GITHUB_TOKEN }}
           # token: "sad"
 
-
-
       # Used to host cibuildwheel
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: "3.9"
           # cache: 'pip' # caching pip dependencies
-          
-      - name: init wheel 
+
+      - name: init wheel
         run: pip install wheel
 
       - name: install pyopenjtalk
@@ -41,10 +39,12 @@ jobs:
           ls -l ./wheel
           tar cvfz wheel.tar.gz ./wheel
           ls -l
-        
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: wheel.tar.gz
+          # files: {{matrix.os}}wheel.tar.gz
+          files: ${{ matrix.os }}-wheel.tar.gz
+          tag_name: ${{ github.ref }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
