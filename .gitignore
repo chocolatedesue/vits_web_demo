@@ -6,7 +6,9 @@ __pycache__
 .ipynb_checkpoints
 
 
+
 # Customize 
+*.secret*
 *.wav
 *.dist
 model/

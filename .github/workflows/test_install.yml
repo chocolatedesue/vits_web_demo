@@ -1,0 +1,50 @@
+name: upload wheel
+
+on:
+  workflow_dispatch:
+
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  upload_wheel:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, windows-2022]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: r9y9/pyopenjtalk
+          ref: v0.3.0
+          submodules: true
+          # token: ${{ secrets.GITHUB_TOKEN }}
+          # token: "sad"
+
+      # Used to host cibuildwheel
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+          # cache: 'pip' # caching pip dependencies
+
+      - name: init wheel
+        run: pip install wheel
+
+      - name: install pyopenjtalk
+        run: |
+          pip wheel --wheel-dir=./wheel ./ 
+          python test/zipfile.py --wheel_dir ./wheel --zip_file ${{ matrix.os }}-wheel.tar.gz
+
+
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          # files: {{matrix.os}}wheel.tar.gz
+          files: ${{ matrix.os }}-wheel.tar.gz
+          tag_name: ${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
