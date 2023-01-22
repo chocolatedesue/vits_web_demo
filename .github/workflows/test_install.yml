@@ -3,9 +3,7 @@ name: upload wheel
 on:
   workflow_dispatch:
 
-  push:
-    tags:
-      - "v*.*.*"
+
 
 jobs:
   upload_wheel:
@@ -45,6 +43,7 @@ jobs:
         with:
           # files: {{matrix.os}}wheel.tar.gz
           files: ${{ matrix.os }}-wheel.tar.gz
-          tag_name: ${{ github.ref }}
+          tag_name: wheel_build
+          name: wheel_build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
