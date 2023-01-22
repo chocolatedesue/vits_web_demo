@@ -9,7 +9,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019]
+        os: [ubuntu-20.04, windows-2021]
 
     steps:
       - uses: actions/checkout@v3
@@ -17,19 +17,34 @@ jobs:
           repository: r9y9/pyopenjtalk
           ref: v0.3.0
           submodules: true
+          # token: ${{ secrets.GITHUB_TOKEN }}
+          # token: "sad"
+
+      # - name: Run shell commands
+      #   run: |
+      #     # git config --global url.https://github.com/.insteadOf git://github.com/
+      #     git clone https://github.com/r9y9/pyopenjtalk.git --branch v0.3.0 --depth 1
+      #     cd pyopenjtalk
+      #     # git checkout v0.3.0
+
 
       # Used to host cibuildwheel
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          # cache: 'pip' # caching pip dependencies
+      # - run: pip install -r requirements.txt
+
 
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel==2.11.4
 
       - name: Build wheels
-        run: python -m cibuildwheel --output-dir wheelhouse
-        # to supply options, put them in 'env', like:
-        # env:
-        #   CIBW_SOME_OPTION: value
+        run: |
+          cd pyopenjtalk
+          python -m cibuildwheel --output-dir wheelhouse
 
-      - uses: actions/upload-artifact@v3
-        with:
-          path: ./wheelhouse/*.whl
+
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     path: ./wheelhouse/*.whl
