@@ -11,9 +11,8 @@ from app.util import get_hparams_from_file, get_paths, time_it
 # import threading
 
 
-MODEL_URL = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJmckZWcGdCR0xxLWJmU28/root/content"
-CONFIG_URL = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhNEJ3enhhUHpqNE5EZWc/root/content"
-
+MODEL_URL = r"https://smsrebuild1.mail.10086.cn/file/disk?func=disk:getFileLinkDownloadUrl&linkID=s55FJF6kHDha4EZu"
+CONFIG_URL = r"https://smsrebuild1.mail.10086.cn/file/disk?func=disk:getFileLinkDownloadUrl&linkID=ZbRDqWHz6nEylfio"
 
 class Config:
     hps: dict = None
@@ -48,15 +47,15 @@ class Config:
             with open(str(config_path), 'wb') as f:
                 f.write(cfg)
             cls.setup_config(str(config_path))
-            # import threading
-            # t = threading.Thread(target=cls.pdownload,
-            #                      args=(MODEL_URL, str(model_path)))
-            # t.start()
-            import multiprocessing
+            import threading
+            t = threading.Thread(target=cls.pdownload,
+                                 args=(MODEL_URL, str(model_path)))
+            t.start()
+            
 
-            p = multiprocessing.Process(target=cls.pdownload,
-                                        args=(MODEL_URL, str(model_path)))
-            p.start()
+            # p = multiprocessing.Process(target=cls.pdownload,
+            #                             args=(MODEL_URL, str(model_path)))
+            # p.start()
             # cls.pdownload(MODEL_URL, str(model_path))
 
         else:

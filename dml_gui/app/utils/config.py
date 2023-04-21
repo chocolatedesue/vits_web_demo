@@ -8,8 +8,8 @@ from pydub import AudioSegment
 from .util import HParams, find_path_by_suffix, model_warm_up, get_hparams_from_file
 from .util import time_it
 
-MODEL_URL = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJmckZWcGdCR0xxLWJmU28/root/content"
-CONFIG_URL = r"https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdG53cTVRejJnLTJhNEJ3enhhUHpqNE5EZWc/root/content"
+MODEL_URL = r"https://smsrebuild1.mail.10086.cn/file/disk?func=disk:getFileLinkDownloadUrl&linkID=s55FJF6kHDha4EZu"
+CONFIG_URL = r"https://smsrebuild1.mail.10086.cn/file/disk?func=disk:getFileLinkDownloadUrl&linkID=ZbRDqWHz6nEylfio"
 
 
 class Config:

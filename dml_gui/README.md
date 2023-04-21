@@ -7,11 +7,10 @@ a simple gui wrapper for onnxruntime ep DirectMl on windows platform
 set PYTHONOPTIMIZE=2
 pyinstaller.exe `
  --path C:\Users\ccds\Desktop\gitrepo\vits_web_demo\dml\app `
- .\main.py -n vits_directml `
---windowed
+   .\main.py -n vits_directml 
 
 # nuitka with cl.exe
-python -m nuitka --standalone .\main.py --enable-plugin=tk-inter --disable-console `
---output-dir onnx_directml 
+python -m nuitka --standalone main.py --enable-plugin=tk-inter --output-dir=./onnx_directml --show-progress --experimental=use_pefile --lto=yes --python-flag=-O  --follow-imports 
+
 ```
 
